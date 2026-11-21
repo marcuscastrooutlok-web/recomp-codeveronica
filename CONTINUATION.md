@@ -1813,3 +1813,13 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - A revisão de origem agora é `5d4e5f5cb824b1134b8d52459ac47d410eba9d5d`; isso substitui explicitamente a revisão antiga para incluir os scripts de build necessários.
 - Próximo passo: confirmar a etapa 14 com todos os patches aplicados e então acompanhar CMake/NDK e Gradle. Nenhum APK foi gerado na execução #11.
 
+
+
+## Execução #12 iniciada — revisão de origem com scripts completos — 2026-11-21
+
+- Run ID: `44941868820`; job ID: `136960621098`.
+- Commit do pedido: `2f40e2023aaf00851faabf619b1f9e84f90705f0`.
+- Revisão RECVX solicitada: `5d4e5f5cb824b1134b8d52459ac47d410eba9d5d`.
+- Estado na última consulta: job `android-apk` em execução; checkout privado em andamento. Todas as etapas posteriores ainda pendentes.
+- Link: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/44941868820
+- Ainda sem APK confirmado.
