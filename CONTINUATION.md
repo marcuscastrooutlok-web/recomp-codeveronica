@@ -1761,3 +1761,16 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - Nova solicitação de build criada em `.github/build-requests/recvx-rebuild-source-6624918-retry-20261121.txt`, apontando para o commit RECVX `6624918613acbe4dd1e56919913b4cc07a8799ff`.
 - Commit da nova solicitação: `96dc09a7e8ff0865dae8ff5e772ad1f3987562cc`.
 - Próxima validação: confirmar se o GitHub Actions agora aceita o YAML e cria o job Android; somente depois acompanhar patches e compilação.
+
+
+## Execução #9 e correção do resolvedor de origem — 2026-11-21
+
+- Após a correção YAML, a execução #9 foi criada com job `android-apk`; validação do XEX passou.
+- Run #9: `44938485172`; job ID `136950294288`.
+- O log revelou a causa da falha na etapa 5: `fatal: not a git repository (or any of the parent directories): .git`. O checkout privado está em `private-input/`, mas a etapa de resolução executava na raiz do runner. Assim, `git diff-tree` não encontrava o repositório e retornava zero arquivos.
+- Correção aplicada no workflow: adicionar `working-directory: private-input` à etapa `Resolve exact public source revision`, permitindo que `git diff-tree` examine o commit e que o arquivo de solicitação seja lido a partir do checkout correto.
+- Commit da correção: `069e97b7956f54d8858fce7dfac871049908bcf1`.
+- Nova solicitação criada: `.github/build-requests/recvx-rebuild-source-6624918-retry2-20261121.txt`, mantendo o commit exato do código-fonte `6624918613acbe4dd1e56919913b4cc07a8799ff`.
+- Commit da nova solicitação: `2aca275cd56f3db83528e2a0841877db87a1d4e7`.
+- Próximo ponto de verificação: confirmar que a etapa 5 lê exatamente um pedido e passa o commit de origem para o checkout público. Nenhum APK foi produzido na execução #9.
+
