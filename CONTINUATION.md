@@ -1799,3 +1799,17 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - A etapa 9 `Install host dependencies for private code generation` estava em andamento na última consulta.
 - **Ainda não existe APK nem artefato APK confirmado.** A geração privada das fontes, patches Android, compilação nativa e verificação final ainda não foram concluídas.
 - Acompanhar: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/44938661087
+
+
+## Execução #11 — diagnóstico do patch ausente e nova revisão de origem — 2026-11-21
+
+- A execução #11 passou pelas etapas 1–13, incluindo geração privada de fontes e instalação do SDK/NDK Android.
+- Falhou na etapa 14 `Apply Android ARM64 SDK compatibility patches`: o log exato informa que `source/scripts/ensure-rexglue-android-link-libs.py` não foi encontrado.
+- O motivo foi confirmado por consulta ao GitHub: a solicitação anterior fixava o código em `6624918613acbe4dd1e56919913b4cc07a8799ff` (2026-11-04), revisão anterior à adição desse script e de outros scripts Android que o workflow chama.
+- O script ausente existe na branch `android-rebuild`, e a auditoria das 13 chamadas `python3 scripts/*.py` do workflow confirmou que todas estão presentes no commit `5d4e5f5cb824b1134b8d52459ac47d410eba9d5d`.
+- Essa revisão inclui os scripts de compatibilidade Android requeridos pelo workflow; portanto, não alteramos nem ignoramos os patches. A solicitação nova passa a apontar para esse commit validado.
+- Nova solicitação: `.github/build-requests/recvx-rebuild-source-5d4e5f5-retry4-20261121.txt`.
+- Commit da solicitação: `2f40e2023aaf00851faabf619b1f9e84f90705f0`.
+- A revisão de origem agora é `5d4e5f5cb824b1134b8d52459ac47d410eba9d5d`; isso substitui explicitamente a revisão antiga para incluir os scripts de build necessários.
+- Próximo passo: confirmar a etapa 14 com todos os patches aplicados e então acompanhar CMake/NDK e Gradle. Nenhum APK foi gerado na execução #11.
+
