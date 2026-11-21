@@ -1774,3 +1774,17 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - Commit da nova solicitação: `2aca275cd56f3db83528e2a0841877db87a1d4e7`.
 - Próximo ponto de verificação: confirmar que a etapa 5 lê exatamente um pedido e passa o commit de origem para o checkout público. Nenhum APK foi produzido na execução #9.
 
+
+
+## Diagnóstico da execução #10 e correção do histórico raso — 2026-11-21
+
+- Execução #10: run ID `44938531410`; job ID `136950438607`; falha na etapa 5 `Resolve exact public source revision`.
+- Log exato: `Expected exactly one build request changed in 2aca275cd56f3db83528e2a0841877db87a1d4e7, found 0`.
+- A validação do arquivo privado `Default.xex` passou (`Private XEX validation: PASS`). O checkout da origem pública, geração de fontes e etapas Android foram ignorados; nenhum APK foi criado.
+- Causa: `actions/checkout` do repositório privado usava profundidade padrão 1, sem baixar o commit pai. Assim, `git diff-tree` não conseguia listar o arquivo adicionado no commit de solicitação.
+- Correção no workflow: `fetch-depth: 2` adicionado ao passo `Checkout private game input`, mantendo o diretório de trabalho `private-input` na etapa de resolução.
+- Commit da correção: `ae12296404cfcd268fe835de71e78e877f2232ef`.
+- O arquivo de solicitação anterior foi confirmado presente e contém `source_ref=android-rebuild` e commit `6624918613acbe4dd1e56919913b4cc07a8799ff`. Esse commit público foi confirmado existente, mensagem `fix: set explicit SDL smoke window dimensions`.
+- Nova solicitação criada: `.github/build-requests/recvx-rebuild-source-6624918-retry3-20261121.txt`, com o mesmo commit exato de origem.
+- Commit da solicitação: `a35cafb9a035c312b3f1ddb03a22cebab3b8c5d3`.
+- Próxima validação: conferir se a etapa 5 identifica exatamente um arquivo e se a etapa 6 faz checkout do SHA solicitado. Não iniciar nova correção sem examinar o log dessa execução.
