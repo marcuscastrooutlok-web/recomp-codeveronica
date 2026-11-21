@@ -1738,3 +1738,14 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - **Estado pendente:** a criação do arquivo solicita o workflow por push, mas a execução correspondente ainda precisa ser confirmada na página GitHub Actions. Não declarar APK produzido até verificar jobs, etapas e artefato.
 - O XEX permanece privado; não foi adicionado ao repositório nem incluído na solicitação.
 
+
+
+## Diagnóstico adicional — falha do workflow #8 (2026-11-21)
+
+- O commit de solicitação `58913834797a6608cad95e4a494600be1ed56062` disparou o workflow #8 em `recvx-private-build`.
+- Run ID: `44938105536`; evento: `push`; conclusão: `failure`.
+- A API de jobs retornou uma lista vazia para essa execução. Portanto, o job `android-apk` não chegou a iniciar e nenhum step, checkout do XEX, checkout do código-fonte ou patch Android foi executado.
+- Não há APK produzido por essa execução.
+- As execuções #6, #7 e #8 aparecem como falhas na tela Actions do usuário.
+- **Causa raiz ainda não confirmada:** é necessário obter a mensagem de erro/check-run do GitHub para explicar por que o workflow terminou sem instanciar jobs. Não presumir que o patch de renderização ou o build nativo falhou; esses passos não começaram.
+- Link da execução #8: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/44938105536
