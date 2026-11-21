@@ -1837,3 +1837,13 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - Nova solicitação de build: `.github/build-requests/recvx-rebuild-source-5d4e5f5-retry5-20261121.txt`.
 - Commit da solicitação: `a7d7a44ce809f9abef48d88eb1b06ff25cf107f5`; revisão pública mantida em `5d4e5f5cb824b1134b8d52459ac47d410eba9d5d`.
 - Próxima verificação: a etapa 14 deve confirmar o patch MSAA e continuar com SDL, CMake/NDK, bibliotecas nativas e Gradle. Ainda não há APK.
+
+
+## Execução #13 iniciada — patch MSAA limitado à região host-depth — 2026-11-21
+
+- Run ID: `44956587492`; job ID: `137005942500`.
+- Commit da solicitação: `a7d7a44ce809f9abef48d88eb1b06ff25cf107f5`.
+- Commit do workflow com a correção de escopo: `98caec1f599b946d63a4a1d457d12c9894559c27`.
+- A execução #13 foi criada e estava em andamento na etapa 2 (`Checkout private game input`) na última consulta.
+- Aguardando validação da etapa 14 com a nova busca limitada ao bloco host-depth; ainda não há APK nem resultado das etapas SDL/CMake/Gradle.
+- Link: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/44956587492
