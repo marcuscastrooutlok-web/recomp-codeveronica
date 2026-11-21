@@ -1749,3 +1749,15 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - As execuções #6, #7 e #8 aparecem como falhas na tela Actions do usuário.
 - **Causa raiz ainda não confirmada:** é necessário obter a mensagem de erro/check-run do GitHub para explicar por que o workflow terminou sem instanciar jobs. Não presumir que o patch de renderização ou o build nativo falhou; esses passos não começaram.
 - Link da execução #8: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/44938105536
+
+
+## Correção da sintaxe YAML — 2026-11-21
+
+- A captura da execução #8 revelou a mensagem do GitHub: `Invalid workflow file ... #L580`, erro de sintaxe YAML.
+- Inspeção de `.github/workflows/private-android-apk.yml` encontrou a linha isolada `|| true` após o comando de limpeza e uma cópia duplicada do restante do workflow anexada ao final do arquivo.
+- Corrigido no repositório `marcuscastrooutlok-web/recvx-private-build`, branch `main`: a linha de limpeza agora termina com `|| true` na mesma linha e o trecho duplicado foi removido. Arquivo reduzido de 1080 para 579 linhas.
+- Commit de correção YAML: `9503c786ca67f72394c455cb8b11b7101a5ff04f`.
+- A parte final do workflow foi relida e confirma a limpeza correta. A aceitação integral pelo parser do GitHub ainda será confirmada pela próxima execução.
+- Nova solicitação de build criada em `.github/build-requests/recvx-rebuild-source-6624918-retry-20261121.txt`, apontando para o commit RECVX `6624918613acbe4dd1e56919913b4cc07a8799ff`.
+- Commit da nova solicitação: `96dc09a7e8ff0865dae8ff5e772ad1f3987562cc`.
+- Próxima validação: confirmar se o GitHub Actions agora aceita o YAML e cria o job Android; somente depois acompanhar patches e compilação.
