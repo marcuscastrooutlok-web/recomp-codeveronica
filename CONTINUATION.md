@@ -1725,3 +1725,16 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - Limite desta alteração: restaura a estrutura do overlay e evita controles falsamente funcionais; não implementa ainda códigos de cheats nem backend de save/load. Também não foi adicionada nesta etapa a combinação Start+Select do controle Bluetooth; a abertura disponível neste patch é pelo botão de toque MENU.
 - Commit de código: `f368db94c4814e5d625d249637b3285d449e9721`.
 - Ainda é necessário compilar o APK e testar com gameplay ativo, toque e controle Bluetooth antes de declarar o overlay validado.
+
+
+## Atualização — 2026-11-21: correção do pedido de build
+
+- No repositório privado `marcuscastrooutlok-web/recvx-private-build`, branch `main`, foi corrigido o bloco de detecção de solicitações em `.github/workflows/private-android-apk.yml`.
+- Correção do workflow: commit `3c5864beeb8d69fcd3cc4f66bd8d63233ce46429`. A expressão regular agora identifica corretamente arquivos `.txt` em `.github/build-requests/`, e a etapa exige exatamente um arquivo alterado.
+- A solicitação anterior apontava para o commit `4dd810652e959fbc9e9febb4d944f55f1286d3c534`, que não foi encontrado no repositório `marcuscastrooutlok-web/recomp-codeveronica`; portanto, não deve ser usado como revisão de origem.
+- O commit `6624918613acbe4dd1e56919913b4cc07a8799ff` foi confirmado como existente no repositório e corresponde ao último HEAD conhecido da branch `android-rebuild` registrado neste arquivo.
+- Nova solicitação criada em `recvx-private-build/.github/build-requests/recvx-rebuild-source-6624918-20261121.txt`, com `source_ref=android-rebuild` e commit exato `6624918613acbe4dd1e56919913b4cc07a8799ff`.
+- Commit que criou a solicitação: `58913834797a6608cad95e4a494600be1ed56062`.
+- **Estado pendente:** a criação do arquivo solicita o workflow por push, mas a execução correspondente ainda precisa ser confirmada na página GitHub Actions. Não declarar APK produzido até verificar jobs, etapas e artefato.
+- O XEX permanece privado; não foi adicionado ao repositório nem incluído na solicitação.
+
