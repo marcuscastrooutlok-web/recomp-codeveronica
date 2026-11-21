@@ -1823,3 +1823,17 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - Estado na última consulta: job `android-apk` em execução; checkout privado em andamento. Todas as etapas posteriores ainda pendentes.
 - Link: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/44941868820
 - Ainda sem APK confirmado.
+
+
+## Execução #12 — patch MSAA host-depth com escopo incorreto; correção no workflow — 2026-11-21
+
+- Run #12: `44941868820`; job `136960621098`; falha na etapa 14, `Apply Android ARM64 SDK compatibility patches`.
+- Os passos anteriores passaram: validação do XEX, resolução da revisão pública, checkout, geração privada de fontes, instalação SDK/NDK e patches Android iniciais.
+- Log fatal: `host-depth stride anchors mismatch; refusing partial/ambiguous patch; expression counts: {'x': (1, 0), 'y': (2, 0)}`.
+- A auditoria do SDK ReXGlue fixado em `398e2ba7802d0c4ca1f68d7ad4fa2cd73e8123eb` confirmou que os dois cálculos host-depth usam atualmente `key.source_msaa_samples`, embora a estrutura também tenha `key.host_depth_source_msaa_samples`. A expressão Y aparece mais uma vez no cálculo da imagem-fonte normal, fora da região host-depth.
+- Causa: o workflow contava correspondências no arquivo inteiro; por isso a contagem Y era 2. A validação global era excessivamente ampla e não representava um patch ambíguo dentro da região pretendida.
+- Correção aplicada no workflow: limitar busca, substituição e verificação à região entre `spv::Id host_depth_source_pixel_x_int` e `// Load the host depth source.`. O patch agora exige exatamente uma âncora X e uma Y dentro dessa região, sem tocar no caminho da imagem-fonte normal.
+- Commit do workflow corrigido: `98caec1f599b946d63a4a1d457d12c9894559c27`.
+- Nova solicitação de build: `.github/build-requests/recvx-rebuild-source-5d4e5f5-retry5-20261121.txt`.
+- Commit da solicitação: `a7d7a44ce809f9abef48d88eb1b06ff25cf107f5`; revisão pública mantida em `5d4e5f5cb824b1134b8d52459ac47d410eba9d5d`.
+- Próxima verificação: a etapa 14 deve confirmar o patch MSAA e continuar com SDL, CMake/NDK, bibliotecas nativas e Gradle. Ainda não há APK.
