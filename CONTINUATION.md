@@ -1788,3 +1788,14 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - Nova solicitação criada: `.github/build-requests/recvx-rebuild-source-6624918-retry3-20261121.txt`, com o mesmo commit exato de origem.
 - Commit da solicitação: `a35cafb9a035c312b3f1ddb03a22cebab3b8c5d3`.
 - Próxima validação: conferir se a etapa 5 identifica exatamente um arquivo e se a etapa 6 faz checkout do SHA solicitado. Não iniciar nova correção sem examinar o log dessa execução.
+
+
+## Execução #11 — detecção da solicitação corrigida (em andamento)
+
+- Run ID: `44938661087`; job ID: `136950800201`; commit do pedido: `a35cafb9a035c312b3f1ddb03a22cebab3b8c5d3`.
+- A correção `fetch-depth: 2` resolveu a falha anterior: etapa 5 `Resolve exact public source revision` concluída com sucesso.
+- Etapa 6 `Checkout public reconstruction source` concluída com sucesso.
+- Etapa 7 `Record checked-out source revision` concluída com sucesso; etapa 8 `Stage XEX only in ephemeral runner workspace` concluída com sucesso.
+- A etapa 9 `Install host dependencies for private code generation` estava em andamento na última consulta.
+- **Ainda não existe APK nem artefato APK confirmado.** A geração privada das fontes, patches Android, compilação nativa e verificação final ainda não foram concluídas.
+- Acompanhar: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/44938661087
