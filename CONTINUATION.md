@@ -1863,3 +1863,13 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - Código-fonte RECVX mantido em `5d4e5f5cb824b1134b8d52459ac47d410eba9d5d`; não foi trocada a base.
 - O artefato da execução #13 contém apenas diagnósticos; nenhum APK foi gerado.
 - Próximo passo: confirmar compilação do `vulkan_presenter.cpp`, prosseguir pelas 999 tarefas nativas e validar o APK ARM64.
+
+
+## Execução #14 iniciada — correção de escapes C++ no diagnóstico Vulkan — 2026-11-21
+
+- Run ID: `44964609537`; commit do pedido `cd049a3752cf4e41b9ee85ecc402a57a32dd9794`.
+- Commit do workflow com os escapes corrigidos: `3ddb78bbfe99720d13255332103a7b3fba0afc07`.
+- Revisão de origem RECVX: `5d4e5f5cb824b1134b8d52459ac47d410eba9d5d`.
+- Estado inicial observado: `in_progress`; ainda não foi possível confirmar se a etapa 17 compila após a correção.
+- Link: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/44964609537
+- Sem APK confirmado até a validação final.
