@@ -1847,3 +1847,19 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - A execução #13 foi criada e estava em andamento na etapa 2 (`Checkout private game input`) na última consulta.
 - Aguardando validação da etapa 14 com a nova busca limitada ao bloco host-depth; ainda não há APK nem resultado das etapas SDL/CMake/Gradle.
 - Link: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/44956587492
+
+
+## Execução #13 — etapa 14 aprovada; erro C++ localizado na etapa 17 — 2026-11-21
+
+- Run ID: `44956587492`; job ID: `137005942500`; conclusão: failure.
+- Etapa 14 `Apply Android ARM64 SDK compatibility patches`: sucesso.
+- Etapas 15 `Checkout pinned SDL 3.5.0` e 16 `Prepare private SDL Android application`: sucesso.
+- Etapa 17 `Configure and compile Android ARM64 native libraries`: falhou no objeto `vulkan_presenter.cpp.o`, em 581/999 tarefas Ninja.
+- Erro C++ exato: `missing terminating '"' character` e `expected expression` nas linhas 1125, 1335, 1440 e 1447 de `vulkan_presenter.cpp`.
+- Causa confirmada no workflow: o patch temporário de diagnóstico Vulkan usa strings Python multilinha com `\n` simples. Python converte esses escapes em quebras de linha reais dentro das strings C++, quebrando a compilação. Não é erro do SDK upstream nem do patch MSAA.
+- Correção aplicada no workflow: duplicar o escape (`\\n` no código Python do workflow) em todo o bloco de diagnósticos Vulkan, para que o arquivo C++ receba `\n` literal.
+- Commit do workflow corrigido: `3ddb78bbfe99720d13255332103a7b3fba0afc07`.
+- Nova solicitação: `.github/build-requests/recvx-rebuild-source-5d4e5f5-retry6-20261121.txt`; commit `cd049a3752cf4e41b9ee85ecc402a57a32dd9794`.
+- Código-fonte RECVX mantido em `5d4e5f5cb824b1134b8d52459ac47d410eba9d5d`; não foi trocada a base.
+- O artefato da execução #13 contém apenas diagnósticos; nenhum APK foi gerado.
+- Próximo passo: confirmar compilação do `vulkan_presenter.cpp`, prosseguir pelas 999 tarefas nativas e validar o APK ARM64.
