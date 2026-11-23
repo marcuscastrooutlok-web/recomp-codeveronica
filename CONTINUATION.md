@@ -1873,3 +1873,40 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - Estado inicial observado: `in_progress`; ainda não foi possível confirmar se a etapa 17 compila após a correção.
 - Link: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/44964609537
 - Sem APK confirmado até a validação final.
+
+
+## Atualização — 2026-11-22: diagnóstico de sombras Vulkan e compilação #17
+
+### Localização deste registro
+- Repositório: `marcuscastrooutlok-web/recomp-codeveronica`
+- URL: https://github.com/marcuscastrooutlok-web/recomp-codeveronica
+- Branch: `android-rebuild`
+- Arquivo: `CONTINUATION.md`
+
+### Resultado do teste da APK #16
+- O usuário instalou e testou a APK #16; as sombras continuaram ausentes.
+- O log interno `recvx.log` foi enviado. O conteúdo disponível apresentou essencialmente avisos repetidos `VKDBGUTILWARN003` do Vulkan/Adreno e não trouxe os registros de diagnóstico de render target/depth/stencil esperados.
+- A ausência desses registros impediu concluir se o problema é suporte D24S8, seleção de caminho Vulkan, attachment de profundidade ou estado das pipelines. Nenhuma dessas hipóteses deve ser declarada causa confirmada.
+
+### Instrumentação adicionada ao SDK
+- Repositório SDK: `marcuscastrooutlok-web/rexglue-sdk`
+- Branch: `android-shadows-diagnostics`
+- Commit `704667f`: mudou o diagnóstico de inicialização do render target para nível WARN, visando torná-lo visível no log interno.
+- Commit `4ef8d03`: adicionou logs das primeiras 48 pipelines criadas com hashes de shaders, render pass, presença de depth attachment, depth test/write/compare e stencil.
+- Estes commits foram feitos na branch de diagnóstico, sem alterar a branch principal do SDK nem a branch principal do RECVX.
+
+### Compilação #17 — resultado e ressalva
+- Repositório de build: `marcuscastrooutlok-web/recvx-private-build`, branch `main`.
+- Run #17: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/45083900878
+- Run ID: `45083900878`; conclusão: `success`.
+- Commit da solicitação: `6a05fd086b482cd4c76f457009b977da1d547145`.
+- Artefato APK: `recvx-private-android-arm64`, ID `14780520389`.
+- Artefato de diagnóstico: `recvx-private-diagnostics`, ID `14780591096`.
+- A inspeção do relatório e do `codegen.log` mostrou que a execução usou a revisão antiga do SDK (`03861b17)), não os novos commits de instrumentação (`704667f` e `4ef8d03`).
+- Consequentemente, a APK #17 não deve ser tratada como contendo a instrumentação nova; não pedir ao usuário que a instale para esse teste. Sucesso do workflow comprova compilação/empacotamento, não correção das sombras nem inclusão dos novos logs.
+
+### Próxima ação obrigatória
+1. Corrigir o vínculo/seleção da revisão do SDK no pipeline privado para apontar explicitamente para `marcuscastrooutlok-web/rexglue-sdk`, branch `android-shadows-diagnostics`, incluindo os commits `704667f` e `4ef8d03` (ou um HEAD posterior que os contenha).
+2. Antes de disparar outra compilação, conferir no workflow e no relatório que o checkout do SDK realmente usa esse repositório e SHA; não aceitar apenas a referência de branch sem validar o SHA resolvido.
+3. Só então solicitar nova APK diagnóstica e conferir o relatório do build antes de pedir instalação.
+4. Manter o trabalho de diagnóstico isolado; não modificar `android-rebuild` do SDK nem alterar shaders/formatos/renderizador às cegas.
