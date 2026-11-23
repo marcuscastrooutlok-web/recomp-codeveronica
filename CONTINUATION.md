@@ -1910,3 +1910,11 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 2. Antes de disparar outra compilação, conferir no workflow e no relatório que o checkout do SDK realmente usa esse repositório e SHA; não aceitar apenas a referência de branch sem validar o SHA resolvido.
 3. Só então solicitar nova APK diagnóstica e conferir o relatório do build antes de pedir instalação.
 4. Manter o trabalho de diagnóstico isolado; não modificar `android-rebuild` do SDK nem alterar shaders/formatos/renderizador às cegas.
+
+
+## Correção — 2026-11-22: SDK de diagnóstico fixado na revisão correta
+
+- A investigação da compilação #17 confirmou que `scripts/common.sh` ainda fixava `RECVX_REXGLUE_COMMIT` em `03861b17bd33bc62287cfc81f4704c5ad32bdff6`, anterior aos novos logs de pipelines Vulkan.
+- Corrigido na branch `android-shadows-diagnostics` para apontar ao HEAD confirmado da branch `android-shadows-diagnostics` do SDK: `4ef8d03eabd318de2c77d5778de352ce0ccd34f9`.
+- Commit da correção no jogo: `02baab1ea16fc63c0c4809a9b89e2d57b00a1419`.
+- Próximo passo: solicitar nova compilação e validar no relatório/checkout que o SDK resolvido é exatamente `4ef8d03eabd318de2c77d5778de352ce0ccd34f9`. Não solicitar instalação antes dessa confirmação.
