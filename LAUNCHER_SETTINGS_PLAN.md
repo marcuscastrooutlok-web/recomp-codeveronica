@@ -96,3 +96,26 @@ No FPS-cap, shader-cache, particle-quality, reduced-effects, anti-aliasing or ga
 - O editor de controles táteis com arrastar/soltar, persistência de posições e tamanho/opacidade continua pendente; não apresentar como implementado.
 - O funcionamento do controle Bluetooth continua pendente de confirmação no aparelho. O modo automático de ocultação deve continuar condicionado à entrada física confirmada, e nunca apenas à enumeração do gamepad virtual.
 - Os controles de renderização, FSR/CAS, limite de FPS, V-Sync, cache, efeitos e áudio só devem ser habilitados após integração com hooks reais do runtime.
+
+
+## Drivers Vulkan personalizados — análise dos pacotes recebidos (2026-11-24)
+
+### Pacotes analisados
+- Turnip v26.0.0 R7 (padrão), GMEM e SYSMEM.
+- Estrutura de cada ZIP: `meta.json` + `vulkan.ad07xx.so`; ELF ARM64/AArch64; Vulkan 1.4.335; minApi 27.
+- O binário padrão e o SYSMEM são idênticos; GMEM é um binário distinto. A interface deve identificar claramente as variantes sem sugerir que padrão e SYSMEM têm código diferente.
+
+### Requisito de implementação
+A seção Drivers deve prever driver do sistema (padrão), importar ZIP, listar pacotes, selecionar, remover e indicar o driver ativo. A importação deve validar ZIP, metadados, nome da biblioteca, ELF ARM64 e integridade antes de copiar para diretório privado do aplicativo. Nunca executar conteúdo arbitrário do ZIP nem copiar drivers para o repositório público.
+
+### Bloqueio antes de declarar seleção funcional
+O loader Vulkan Android usa a descoberta HAL do sistema (`hw_get_module("vulkan")`) e não permite que um APK comum substitua o driver do sistema por uma biblioteca colocada no armazenamento privado. Portanto, a UI não pode marcar um pacote Turnip como “ativo” só porque foi importado ou selecionado.
+
+Investigar a extensão `VK_LUNARG_direct_driver_loading` como caminho de carregamento direto fornecido pela aplicação. Antes de implementar ativação, confirmar que o loader Vulkan do dispositivo expõe a extensão, que a biblioteca Turnip pode ser carregada nesse modo e que a criação de instância do ReXGlue aceita o driver externo. Se não for suportado, deixar a ativação desabilitada e explicar a limitação; manter “Driver do sistema” como única opção ativa. Não usar `VK_DRIVER_FILES` como solução Android sem evidência, pois a descoberta Android documentada é diferente.
+
+### Critérios de aceitação
+1. Importação segura e persistente dos três pacotes.
+2. Remoção e seleção persistentes, com indicação separada de “importado/selecionado” e “realmente carregado”.
+3. Log de inicialização confirmando o driver Vulkan efetivamente carregado (nome/versão/driverID quando disponível).
+4. Fallback automático ao driver do sistema se o carregamento direto falhar; nunca deixar o app sem caminho de inicialização.
+5. Não habilitar o botão “Ativar” até os itens 2–4 estarem comprovados no Motorola Edge 30 Pro.
