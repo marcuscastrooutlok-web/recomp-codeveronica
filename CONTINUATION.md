@@ -2035,3 +2035,46 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 
 ### Fonte técnica externa
 - KhronosGroup Vulkan-Loader, `LoaderDriverInterface.md`, seção “Driver Discovery on Android”: https://github.com/KhronosGroup/Vulkan-Loader/blob/main/docs/LoaderDriverInterface.md
+
+
+## CORREÇÃO DE DIAGNÓSTICO — referência funcional Turnip encontrada (2026-11-24)
+
+### Repositório de referência analisado
+- https://github.com/victorgbd/NFSMW-Recompiled-Mobile
+- Branch: `main`
+- Arquivos lidos: `tools/parche_turnip.py`, `android/app/src/main/java/io/github/nfsmwrecomp/Drivers.java`, `Ajustes.java`, `SetupActivity.java`, `GameActivity.java`, `docs/android.md`.
+
+### Correção explícita da conclusão anterior
+A afirmação anterior de que um APK comum não poderia carregar Turnip e que seria necessário root/driver de sistema estava errada para este caso. O projeto de referência carrega um driver Vulkan próprio em Android sem substituir o driver do sistema, usando **libadrenotools** e um patch no ponto em que o ReXGlue cria o VulkanInstance. Não usar `VK_LUNARG_direct_driver_loading` como hipótese principal: há um mecanismo concreto já implementado e testado.
+
+### Mecanismo comprovado no projeto de referência
+1. A launcher importa um ZIP de adrenotools com `meta.json` e biblioteca `.so`.
+2. `Drivers.java` extrai os arquivos para `Context.getFilesDir()/gpu_drivers/<nome>/` (armazenamento interno privado), lê `libraryName` do `meta.json` e guarda o nome em `.libreria`.
+3. `Ajustes.java` passa as cvars de inicialização: `android_native_lib_dir`, `android_tmp_dir`, `android_gpu_driver_dir`, `android_gpu_driver_name` e `android_gpu_turbo`.
+4. `tools/parche_turnip.py` modifica `DynamicLibrary` para aceitar `Adopt(handle)`, adiciona as cvars Android e, em `VulkanInstance::Create`, chama `adrenotools_open_libvulkan(RTLD_NOW, ADRENOTOOLS_DRIVER_CUSTOM, ...)`. O handle retornado é adotado pelo loader Vulkan; se falhar, há fallback para o driver do sistema.
+5. O patch também liga `libadrenotools` ao CMake Android. Os hooks nativos da biblioteca precisam estar disponíveis em `nativeLibraryDir`; o APK de referência documenta `useLegacyPackaging = true` para extrair as .so.
+6. `SetupActivity.java` oferece importação, escolha por RadioGroup e remoção; a seleção é enviada ao processo do jogo na inicialização. `GameActivity` roda em processo próprio para permitir reinicialização limpa das bibliotecas nativas.
+
+### Compatibilidade com os ZIPs Turnip do usuário
+- Pacotes recebidos: `Turnip_v26.0.0_R7.zip`, `Turnip_v26.0.0_R7_Gmem.zip`, `Turnip_v26.0.0_R7_Sysmem.zip`.
+- A importação deve respeitar exatamente `libraryName` de cada `meta.json`; não renomear a biblioteca para um nome fixo.
+- Validar que a biblioteca declarada existe no ZIP e que o pacote corresponde à arquitetura ARM64 antes de instalá-lo.
+- A análise anterior identificou que o binário padrão e SYSMEM são idênticos; GMEM é diferente. Preservar os três nomes/entradas na interface, mas não afirmar que os três binários são distintos.
+
+### Evidência e limite de desempenho da referência
+- O README/docs do projeto declaram Turnip via libadrenotools como funcional.
+- Em `docs/android.md`, o teste documentado em Snapdragon 8 Elite / Adreno 830 relata que Turnip Gen8 V36 só inicia com `TU_DEBUG=sysmem`; com isso mediu 44 FPS frente a 60 FPS do driver Qualcomm. O modo GMEM travou nesse aparelho.
+- Esse resultado não pode ser extrapolado diretamente ao Motorola Edge 30 Pro (Adreno 730) nem aos pacotes R7 recebidos. Deve ser usado como alerta de compatibilidade e ponto de partida de teste, não como resultado esperado.
+
+### Plano específico para RECVX
+- Portar o mecanismo de carregamento `libadrenotools` para o SDK Android efetivamente usado pela branch `android-rebuild`, adaptando os pontos de integração ao estado real do ReXGlue SDK; não copiar a launcher inteira de NFSMW.
+- Conferir como o workflow atual compila/empacota as bibliotecas hooks e habilitar extração correta das .so no APK.
+- Adaptar o importador para os ZIPs do usuário e persistir seleção/driver ativo.
+- Adicionar a seção Drivers à launcher RECVX mantendo layout e configurações existentes.
+- Fazer a criação do VulkanInstance usar o Turnip selecionado e registrar no log se foi carregado ou se ocorreu fallback para o driver do sistema.
+- Não ativar turbo KGSL automaticamente; manter desligado por padrão e testar separadamente. A referência alerta que pode reduzir desempenho e altera estado de energia da GPU.
+- Testar primeiro com driver do sistema, depois cada pacote R7 (incluindo SYS_MEM/GMEM) no Edge 30 Pro. Nenhuma compilação deve ser considerada validada apenas porque o ZIP foi importado.
+
+### Estado
+- Esta análise corrige a hipótese técnica anterior.
+- Ainda não foi aplicado código de Turnip no RECVX nem iniciado novo APK.
