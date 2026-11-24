@@ -2078,3 +2078,30 @@ A afirmação anterior de que um APK comum não poderia carregar Turnip e que se
 ### Estado
 - Esta análise corrige a hipótese técnica anterior.
 - Ainda não foi aplicado código de Turnip no RECVX nem iniciado novo APK.
+
+
+## 2026-11-24 — Primeira integração do Turnip no SDK Android (patch preparado)
+
+### Localização
+- Repositório: `marcuscastrooutlok-web/recomp-codeveronica`
+- Branch: `android-rebuild`
+- Arquivo de código: `scripts/ensure-rexglue-turnip.py`
+- Workflow de validação: `.github/workflows/android-arm64-probe.yml`
+
+### O que foi alterado
+- Criado `scripts/ensure-rexglue-turnip.py`, patch idempotente que valida todos os pontos de ancoragem antes de escrever qualquer arquivo no SDK.
+- O patch adiciona `DynamicLibrary::Adopt`, cvars Android init-only para pasta/nome do driver, diretório das hooks, diretório temporário e TU_DEBUG; carrega driver personalizado via `adrenotools_open_libvulkan` em `VulkanInstance::Create`; mantém fallback para `libvulkan.so` do sistema; adiciona link/define de `adrenotools` ao alvo `rexui`; e inclui libadrenotools no CMake Android quando o código-fonte estiver presente.
+- Atualizado o workflow para clonar libadrenotools no commit fixo `8fae8ce254dfc1344527e05301e43f37dea2df80`, inicializar submódulos e executar o patch após os patches de plataforma Android.
+- SDK ReXGlue usado pelo workflow permanece fixado em `398e2ba7802d0c4ca1f68d7ad4fa2cd73e8123eb`.
+
+### O que ainda NÃO foi comprovado
+- O workflow ainda não executou após essa mudança; portanto o patch não está validado por compilação.
+- O workflow atual é uma sonda/compilação do SDK Android, não uma geração de APK completo do jogo.
+- A launcher ainda não importa ZIPs nem passa as cvars ao processo nativo; hooks do adrenotools ainda não foram integradas ao empacotamento Gradle do APK real.
+- Ainda é necessário confirmar no APK que as quatro bibliotecas hook produzidas por libadrenotools estão extraídas em `nativeLibraryDir`, conforme `useLegacyPackaging = true` no projeto de referência.
+
+### Próximos passos curtos
+1. Executar o workflow `Android ARM64 platform probe` e corrigir erros de patch/configuração/compilação antes de tocar na launcher.
+2. Conferir os nomes/saídas dos hooks no build de libadrenotools e adicioná-los ao empacotamento do APK real.
+3. Integrar importador ZIP seguro com leitura de `libraryName` do `meta.json`, persistência da seleção e cvars de inicialização.
+4. Confirmar no log driver carregado ou fallback antes de declarar Turnip ativo.
