@@ -1999,3 +1999,39 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 ### Estado
 - A APK #19 produziu os diagnósticos esperados e os logs foram analisados.
 - As sombras continuam sem causa raiz confirmada; não há correção visual comprovada.
+
+
+## 2026-11-24 — Pacotes Turnip recebidos e análise de instalação Android
+
+### Localização deste registro
+- Repositório: `marcuscastrooutlok-web/recomp-codeveronica`
+- Branch: `android-rebuild`
+- Arquivo: `CONTINUATION.md`
+
+### Pacotes fornecidos pelo usuário
+- `Turnip_v26.0.0_R7.zip`
+- `Turnip_v26.0.0_R7_Gmem.zip`
+- `Turnip_v26.0.0_R7_Sysmem.zip`
+
+### Estrutura e validação dos ZIPs
+- Cada pacote contém somente `meta.json` e `vulkan.ad07xx.so`.
+- Os três metadados declaram Mesa Turnip v26.0.0 R7, Vulkan 1.4.335 e API mínima 27.
+- A biblioteca é ELF 64-bit AArch64 (ARM64), apropriada quanto à arquitetura para o ABI do aparelho; isso não comprova compatibilidade operacional com a GPU/loader do aparelho.
+- Os binários GMEM e SYSMEM são diferentes.
+- Os binários do pacote padrão e SYSMEM são idênticos byte a byte; ambos têm SHA-256 `ab879bc6605b81bc790eb3519608a998a681d0c47b2d957ea8219f2e6eaa6082`. O pacote GMEM tem SHA-256 `e2d4c958156a9ebc00083240e146df882af290321cb9d0c0127b2c5435ef0fdd`.
+- Portanto, manter nomes distintos na interface pode ajudar o usuário, mas não se deve apresentar padrão e SYSMEM como binários diferentes.
+
+### Restrição técnica decisiva — Android Vulkan
+- A documentação do Vulkan Loader/Khronos descreve que, no Android, o loader do sistema carrega o driver via HAL `hw_get_module("vulkan")`; a descoberta/instalação do driver do sistema não pode ser substituída por um APK comum devido às políticas de segurança do Android.
+- Logo, extrair `vulkan.ad07xx.so` para o armazenamento privado e salvar uma preferência NÃO faz o Turnip tornar-se o driver Vulkan ativo. Também não é válido simplesmente definir `VK_DRIVER_FILES`: a documentação do loader descreve essa variável para outras plataformas, enquanto a descoberta Android segue o caminho HAL.
+- Existe a extensão Vulkan `VK_LUNARG_direct_driver_loading` como possível via de carregamento direto em aplicações, mas sua disponibilidade no loader do dispositivo e a compatibilidade destes binários com esse contrato ainda precisam ser verificadas. Não assumir suporte nem alterar o caminho de inicialização Vulkan sem prova.
+- Sem suporte comprovado ao carregamento direto, a instalação/seleção real exigiria integração privilegiada/sistema (por exemplo, driver do sistema/ambiente com suporte próprio), não uma simples função de launcher em APK não-root.
+
+### Estado da implementação
+- Nenhum ZIP foi copiado para o repositório; os drivers não devem ser versionados nem embutidos no APK público.
+- Nenhuma alteração de código da launcher ou do carregamento Vulkan foi feita nesta etapa.
+- Próxima etapa: verificar se o loader Vulkan do Android 13/Adreno 730 expõe `VK_LUNARG_direct_driver_loading` e se o SDK consegue passar uma lista de driver ao criar a instância. Se não houver esse suporte, a launcher deve limitar-se a importar/gerenciar os pacotes e informar claramente que a ativação do driver externo não está disponível neste APK — sem indicar falsamente que o Turnip foi ativado.
+- Preservar o driver do sistema como padrão e oferecer retorno imediato a ele caso uma futura integração de carregamento direto seja validada.
+
+### Fonte técnica externa
+- KhronosGroup Vulkan-Loader, `LoaderDriverInterface.md`, seção “Driver Discovery on Android”: https://github.com/KhronosGroup/Vulkan-Loader/blob/main/docs/LoaderDriverInterface.md
