@@ -119,3 +119,32 @@ Investigar a extensão `VK_LUNARG_direct_driver_loading` como caminho de carrega
 3. Log de inicialização confirmando o driver Vulkan efetivamente carregado (nome/versão/driverID quando disponível).
 4. Fallback automático ao driver do sistema se o carregamento direto falhar; nunca deixar o app sem caminho de inicialização.
 5. Não habilitar o botão “Ativar” até os itens 2–4 estarem comprovados no Motorola Edge 30 Pro.
+
+
+## Revisão do plano — usar libadrenotools (referência NFSMW-Recompiled-Mobile)
+
+A conclusão anterior de que um APK Android comum não poderia carregar Turnip foi corrigida. A referência https://github.com/victorgbd/NFSMW-Recompiled-Mobile implementa carregamento de driver Vulkan customizado sem substituir o driver do sistema, usando libadrenotools.
+
+### Implementação a portar para o RECVX
+- Importador Java: ler `meta.json`, usar o `libraryName` exato e extrair a biblioteca para `files/gpu_drivers/<driver>/` no armazenamento interno privado. Não extrair caminhos arbitrários do ZIP; validar biblioteca, tamanho e ELF ARM64.
+- Preferência persistente para driver do sistema ou driver importado; listar, selecionar e remover na launcher.
+- No processo do jogo, passar `--android_native_lib_dir`, `--android_tmp_dir`, `--android_gpu_driver_dir` e `--android_gpu_driver_name` como cvars init-only.
+- Integrar libadrenotools no SDK Android e alterar `VulkanInstance::Create`: chamar `adrenotools_open_libvulkan(RTLD_NOW, ADRENOTOOLS_DRIVER_CUSTOM, ...)`, adotar o handle no DynamicLibrary e manter fallback para o driver do sistema se falhar.
+- Empacotar as bibliotecas hooks necessárias em `nativeLibraryDir`; revisar `useLegacyPackaging = true`/equivalente no Gradle para que as .so sejam extraídas.
+- Garantir que o log diferencie “driver escolhido”, “driver customizado carregado” e “fallback para driver do sistema”.
+
+### Cuidados para os pacotes fornecidos
+- Ler o `libraryName` de cada `meta.json`; não assumir `libvulkan_freedreno.so` nem renomear `vulkan.ad07xx.so`.
+- Manter padrão, GMEM e SYSMEM como opções identificáveis. Binários padrão e SYSMEM dos ZIPs recebidos foram identificados como idênticos; GMEM é diferente.
+- Não habilitar turbo KGSL automaticamente; testar desligado primeiro.
+- A referência NFSMW documenta que Turnip Gen8 V36 no Adreno 830 só inicia com `TU_DEBUG=sysmem` e foi mais lento que Qualcomm (44 vs 60 FPS), enquanto GMEM travou. Isso é evidência do aparelho de referência, não previsão para o Edge 30 Pro/Adreno 730 ou Turnip R7.
+
+### Validação obrigatória
+1. Compilar e executar primeiro com driver Qualcomm do sistema (sem regressão).
+2. Confirmar que os hooks do adrenotools estão no APK e são encontrados no `nativeLibraryDir`.
+3. Testar importação e seleção de cada ZIP R7 no Edge 30 Pro.
+4. Confirmar no log o nome/versão do driver realmente carregado; se falhar, confirmar fallback.
+5. Comparar estabilidade, sombras, FPS e temperatura entre sistema e cada variante.
+6. Só depois considerar a integração concluída; nenhuma importação de ZIP, isoladamente, prova que o driver está ativo.
+
+**Referência de código:** `tools/parche_turnip.py`, `android/app/src/main/java/io/github/nfsmwrecomp/Drivers.java`, `Ajustes.java`, `SetupActivity.java` e `docs/android.md` no repositório NFSMW-Recompiled-Mobile.
