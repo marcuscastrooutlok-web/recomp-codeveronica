@@ -67,6 +67,16 @@ jobs:
           python3 scripts/ensure-rexglue-android-thread-name-compat.py .deps/rexglue-sdk
           python3 scripts/ensure-rexglue-android-content-uri.py .deps/rexglue-sdk
 
+      - name: Prepare pinned libadrenotools and apply Turnip SDK integration
+        run: |
+          set -euo pipefail
+          git clone https://github.com/bylaws/libadrenotools.git .deps/rexglue-sdk/thirdparty/libadrenotools
+          git -C .deps/rexglue-sdk/thirdparty/libadrenotools checkout --detach 8fae8ce254dfc1344527e05301e43f37dea2df80
+          git -C .deps/rexglue-sdk/thirdparty/libadrenotools submodule update --init --recursive
+          python3 scripts/ensure-rexglue-turnip.py .deps/rexglue-sdk
+          echo "libadrenotools commit: $(git -C .deps/rexglue-sdk/thirdparty/libadrenotools rev-parse HEAD)"
+          echo "Turnip SDK integration: applied"
+
       - name: Probe CMake configuration for Android ARM64
         id: probe
         continue-on-error: true
