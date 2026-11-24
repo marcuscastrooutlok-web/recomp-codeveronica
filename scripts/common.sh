@@ -8,7 +8,7 @@ RECVX_XEX="$RECVX_ROOT/game/Default.xex"
 RECVX_MANIFEST="$RECVX_ROOT/recvx_manifest.toml"
 RECVX_EXPECTED_REXGLUE_VERSION="0.10.0-dev.g398e2ba"
 RECVX_REXGLUE_VERSION_PREFIX="0.10."
-RECVX_REXGLUE_COMMIT="4ef8d03eabd318de2c77d5778de352ce0ccd34f9"
+RECVX_REXGLUE_COMMIT="3fe59240a378da19730042f292e7baa1c706dec4"
 RECVX_REXGLUE_REPOSITORY="https://github.com/marcuscastrooutlok-web/rexglue-sdk.git"
 
 case "$(uname -m)" in
