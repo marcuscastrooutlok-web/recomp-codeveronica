@@ -1918,3 +1918,13 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - Corrigido na branch `android-shadows-diagnostics` para apontar ao HEAD confirmado da branch `android-shadows-diagnostics` do SDK: `4ef8d03eabd318de2c77d5778de352ce0ccd34f9`.
 - Commit da correção no jogo: `02baab1ea16fc63c0c4809a9b89e2d57b00a1419`.
 - Próximo passo: solicitar nova compilação e validar no relatório/checkout que o SDK resolvido é exatamente `4ef8d03eabd318de2c77d5778de352ce0ccd34f9`. Não solicitar instalação antes dessa confirmação.
+
+
+## Compilação #18 — 2026-11-23: SDK de diagnóstico confirmado
+
+- Workflow: `marcuscastrooutlok-web/recvx-private-build`, run `45095520105`, conclusão `success`.
+- APK ARM64 e artefato de diagnóstico gerados. Relatório: `recvx-private-diagnostics`, artifact ID `14784388133`; APK artifact ID `14784950269`.
+- Source checkout confirmado: `02baab1ea16fc63c0c4809a9b89e2d57b00a1419` (branch `android-shadows-diagnostics`).
+- SDK checkout confirmado em `codegen.log`: `4ef8d03eabd318de2c77d5778de352ce0ccd34f9`, incluindo a mensagem HEAD `Log successful Vulkan depth and stencil pipeline state for shadow diagnosis`.
+- Diferente da #17, a #18 efetivamente usou o SDK atualizado. A compilação passou e a validação de bibliotecas nativas passou.
+- A compilação não prova ainda que as sombras foram corrigidas: os novos logs são diagnósticos de execução. Próxima etapa é testar esta APK no aparelho, reproduzir uma cena com sombras e coletar o log para analisar render-target e estados depth/stencil. Não declarar a causa antes desses dados.
