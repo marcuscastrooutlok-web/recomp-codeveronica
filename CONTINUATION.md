@@ -1965,3 +1965,37 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - A #19 ainda não comprova correção visual das sombras. Instalar/testar no Motorola Edge 30 Pro, abrir uma cena em que as sombras deveriam aparecer e coletar o `recvx.log`.
 - Filtrar os registros `SHADOW_BIND_DIAG` para correlacionar a imagem de profundidade, layout/barreiras e descriptors realmente vinculados ao shader. Não aplicar correção de renderizador antes dessa evidência.
 - Não confundir sucesso da compilação com confirmação de sombras corrigidas.
+
+
+## Análise dos logs da APK #19 — 2026-11-24
+
+### Arquivo recebido e cobertura
+- O usuário enviou `logs.zip`, com 13 arquivos: `recvx.log` e `recvx.1.log` até `recvx.12.log`.
+- Os registros novos `SHADOW_BIND_DIAG` aparecem em `recvx.12.log`: 128 eventos de barreira e 128 eventos de descriptor. Os outros 12 arquivos não contêm esses registros.
+- As linhas diagnósticas foram geradas em torno de 2026-11-24 12:23:40–12:23:42 (horário exibido no log).
+
+### Evidência observada
+- Todas as 128 barreiras registradas mudam de `old_layout=7` para `new_layout=5`; formatos registrados: 6 (81), 23 (40) e 18 (7).
+- Os descriptors aparecem nas seguintes combinações:
+  - índice 0, formato 6: signed=false válido (45); signed=true inválido (45).
+  - índice 1, formato 23: signed=false válido (15); signed=true inválido (15).
+  - índice 0, formato 18: signed=false válido (4); signed=true inválido (4).
+- Em todos os casos registrados, `binding_valid=true`; `image_view_valid` é true para signed=false e false para signed=true.
+- O log também contém eventos `RECVX-DEPTH-TRANSFER` nos modos 1, 2, 3, 6, 7, 8 e 9 próximos aos descriptors. Isso mostra que o fluxo de transferência de profundidade está ativo, mas não identifica por si só a textura como shadow map.
+- O aviso `VKDBGUTILWARN003` do driver Adreno aparece repetidamente; a mensagem genérica não contém o detalhe necessário para atribuir a causa.
+- Os arquivos não fornecem nome/hash do shader, identificação semântica da textura como shadow map, nem demonstram qual variante signed/unsigned foi consumida pelo draw de sombras.
+
+### Interpretação limitada
+- No SDK fixado em `3fe59240a378da19730042f292e7baa1c706dec4`, `GetActiveBindingOrNullImageView()` escolhe `image_view_signed` ou `image_view_unsigned` conforme o parâmetro `is_signed`; se a view não existe e `nullDescriptor` não é suportado, retorna uma imagem nula padrão.
+- Portanto, a repetição de `signed=true image_view_valid=false` é uma pista verificável de que a view assinada não está disponível para essas bindings. Ainda não está provado que o shader de sombras use a variante assinada; o runtime pode consultar/registrar ambas as variantes.
+- Não aplicar ainda uma correção que force view signed, altere formato ou mude layout. Isso poderia afetar outras texturas e não está sustentado pelos logs atuais.
+
+### Próxima ação técnica
+1. Rastrear no SDK a criação de `image_view_signed`, `image_view_unsigned` e a decisão `IsSignedVersionSeparateForFormat()` para os formatos guest 6, 23 e 18.
+2. Correlacionar os fetch constants e os bindings com os shaders/draws que realmente fazem amostragem de profundidade/sombra; confirmar se o caminho signed é usado.
+3. Se necessário, acrescentar instrumentação estreita no ponto de criação da view e no bind do pipeline, registrando fetch constant, formato, flags de sinal, view selecionada e hash do shader. Não aumentar logs genéricos.
+4. Só depois escolher uma correção e gerar novo APK de teste.
+
+### Estado
+- A APK #19 produziu os diagnósticos esperados e os logs foram analisados.
+- As sombras continuam sem causa raiz confirmada; não há correção visual comprovada.
