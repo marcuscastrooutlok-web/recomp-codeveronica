@@ -1928,3 +1928,13 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - SDK checkout confirmado em `codegen.log`: `4ef8d03eabd318de2c77d5778de352ce0ccd34f9`, incluindo a mensagem HEAD `Log successful Vulkan depth and stencil pipeline state for shadow diagnosis`.
 - Diferente da #17, a #18 efetivamente usou o SDK atualizado. A compilação passou e a validação de bibliotecas nativas passou.
 - A compilação não prova ainda que as sombras foram corrigidas: os novos logs são diagnósticos de execução. Próxima etapa é testar esta APK no aparelho, reproduzir uma cena com sombras e coletar o log para analisar render-target e estados depth/stencil. Não declarar a causa antes desses dados.
+
+
+## 2026-11-24 — Diagnóstico de vínculo de textura de sombra
+
+- Na branch `android-shadows-diagnostics` do SDK `marcuscastrooutlok-web/rexglue-sdk`, foi adicionada instrumentação limitada a 128 registros por categoria em `src/graphics/vulkan/texture_cache.cpp`.
+- Os registros `SHADOW_BIND_DIAG` capturam barreiras de textura (índice, formato, uso anterior/novo, layout real anterior/destino e imagem) e descriptors (índice, dimensão, signed, validade da binding/image view, formato e imagem).
+- SDK commit: `3fe59240a378da19730042f292e7baa1c706dec4`.
+- Código do jogo na branch `android-shadows-diagnostics` atualizado para fixar esse SDK: commit `fb8f386921c86fe47fec5d49a2b684063fd663ed`.
+- Solicitação de build #19 criada no repositório privado `marcuscastrooutlok-web/recvx-private-build`; workflow run `45404827892` está em fila no momento do registro.
+- Esta é instrumentação, não correção visual. Após build, validar o SHA do SDK no relatório antes de distribuir o APK. Depois coletar `recvx.log` e filtrar `SHADOW_BIND_DIAG` para correlacionar barreiras e descriptors.
