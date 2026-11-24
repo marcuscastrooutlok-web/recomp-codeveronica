@@ -1938,3 +1938,30 @@ Foi atualizado `scripts/ensure-rexglue-android-input-fps.py` para inserir, no ch
 - Código do jogo na branch `android-shadows-diagnostics` atualizado para fixar esse SDK: commit `fb8f386921c86fe47fec5d49a2b684063fd663ed`.
 - Solicitação de build #19 criada no repositório privado `marcuscastrooutlok-web/recvx-private-build`; workflow run `45404827892` está em fila no momento do registro.
 - Esta é instrumentação, não correção visual. Após build, validar o SHA do SDK no relatório antes de distribuir o APK. Depois coletar `recvx.log` e filtrar `SHADOW_BIND_DIAG` para correlacionar barreiras e descriptors.
+
+
+## Compilação #19 — 2026-11-24: SDK e código-fonte confirmados; aguardando teste no aparelho
+
+### Localização deste registro
+- Repositório: `marcuscastrooutlok-web/recomp-codeveronica`
+- Branch: `android-rebuild`
+- Arquivo: `CONTINUATION.md`
+- URL: https://github.com/marcuscastrooutlok-web/recomp-codeveronica/blob/android-rebuild/CONTINUATION.md
+
+### Resultado verificado
+- Repositório de build: `marcuscastrooutlok-web/recvx-private-build`, branch `main`.
+- Workflow #19: run ID `45404827892`; conclusão `success`.
+- Link: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/45404827892
+- Commit do pedido privado: `a183d88f70398cfe51650be42f35ad72dd184be8`.
+- Revisão efetiva do código RECVX: `fb8f386921c86fe47fec5d49a2b684063fd663ed`, branch `android-shadows-diagnostics`.
+- Revisão efetiva do SDK ReXGlue, confirmada no `codegen.log`: `3fe59240a378da19730042f292e7baa1c706dec4`. A mensagem de checkout confirma explicitamente esse SHA.
+- Artefato de diagnóstico: `recvx-private-diagnostics`, ID `14931745956`; contém `codegen.log`, `diagnostic-report.txt`, inventário de bibliotecas e logs de build.
+- Artefato APK ARM64: `recvx-private-android-arm64`, ID `14930227612`.
+- A validação de bibliotecas nativas retornou `PASS`; todas as etapas do job `android-apk` concluíram com sucesso.
+- Portanto, diferentemente de builds anteriores com SDK incorreto, a #19 comprovadamente foi compilada com a instrumentação de barreiras e descriptors de textura.
+
+### Limite do resultado e próximo passo
+- Os registros `SHADOW_BIND_DIAG` são emitidos durante a execução do jogo; não aparecem no log de codegen/build. A ausência deles no `codegen.log` não indica falha da instrumentação.
+- A #19 ainda não comprova correção visual das sombras. Instalar/testar no Motorola Edge 30 Pro, abrir uma cena em que as sombras deveriam aparecer e coletar o `recvx.log`.
+- Filtrar os registros `SHADOW_BIND_DIAG` para correlacionar a imagem de profundidade, layout/barreiras e descriptors realmente vinculados ao shader. Não aplicar correção de renderizador antes dessa evidência.
+- Não confundir sucesso da compilação com confirmação de sombras corrigidas.
