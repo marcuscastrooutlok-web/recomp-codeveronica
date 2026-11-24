@@ -148,3 +148,13 @@ A conclusão anterior de que um APK Android comum não poderia carregar Turnip f
 6. Só depois considerar a integração concluída; nenhuma importação de ZIP, isoladamente, prova que o driver está ativo.
 
 **Referência de código:** `tools/parche_turnip.py`, `android/app/src/main/java/io/github/nfsmwrecomp/Drivers.java`, `Ajustes.java`, `SetupActivity.java` e `docs/android.md` no repositório NFSMW-Recompiled-Mobile.
+
+
+## Implementação em andamento — integração do Turnip no SDK (2026-11-24)
+
+- Patch do SDK: `scripts/ensure-rexglue-turnip.py`.
+- Workflow: `.github/workflows/android-arm64-probe.yml` agora clona libadrenotools no commit `8fae8ce254dfc1344527e05301e43f37dea2df80` e executa o patch após os patches Android.
+- SDK fixado: `398e2ba7802d0c4ca1f68d7ad4fa2cd73e8123eb`.
+- O patch prepara o carregamento nativo via `adrenotools_open_libvulkan` e fallback ao driver do sistema. Ainda não há confirmação de compilação; aguardar workflow.
+- Não confundir esta etapa com a feature completa: importação ZIP, seleção persistente, empacotamento das hooks no APK e passagem das cvars pela launcher ainda faltam.
+- A referência NFSMW usa `useLegacyPackaging = true` porque as hooks precisam existir em `nativeLibraryDir`; reproduzir isso no APK real e validar nomes dos artefatos gerados.
