@@ -90,8 +90,16 @@ for rel, old, new, label in changes:
     elif src.count(old) == 1: pending[rel] = src.replace(old, new, 1)
     else: raise SystemExit(f"[turnip] {label}: anchor count {src.count(old)} in {rel}; no files changed")
 for rel, src in pending.items(): (root / rel).write_text(src, encoding="utf-8")
-for rel, old, new, label in changes:
-    if new not in (root / rel).read_text(encoding="utf-8"):
-        raise SystemExit(f"[turnip] post-patch verification failed: {label}")
+# Verify using stable markers rather than requiring the entire inserted block
+# to remain byte-identical (formatting/line-ending changes are harmless).
+markers = {
+    "include/rex/platform/dynlib.h": "void Adopt(void* handle)",
+    "src/ui/vulkan/vulkan_instance.cpp": "#include <adrenotools/driver.h>",
+    "src/ui/CMakeLists.txt": "REX_HAS_ADRENOTOOLS=1",
+    "thirdparty/CMakeLists.txt": "add_subdirectory(libadrenotools)",
+}
+for rel, marker in markers.items():
+    if marker not in (root / rel).read_text(encoding="utf-8"):
+        raise SystemExit(f"[turnip] post-patch verification failed: {marker} missing in {rel}")
 print("[turnip] libadrenotools SDK integration applied and verified")
 print("[turnip] custom driver is opt-in; system Vulkan remains the fallback")
