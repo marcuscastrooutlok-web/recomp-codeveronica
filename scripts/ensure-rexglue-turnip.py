@@ -84,12 +84,23 @@ endif()""","build libadrenotools"),
 pending = {}
 for rel, old, new, label in changes:
     p = root / rel
-    if not p.is_file(): raise SystemExit(f"[turnip] missing SDK file: {rel}")
-    src = p.read_text(encoding="utf-8")
-    if new in src: pending[rel] = src
-    elif src.count(old) == 1: pending[rel] = src.replace(old, new, 1)
-    else: raise SystemExit(f"[turnip] {label}: anchor count {src.count(old)} in {rel}; no files changed")
-for rel, src in pending.items(): (root / rel).write_text(src, encoding="utf-8")
+    if not p.is_file():
+        raise SystemExit(f"[turnip] missing SDK file: {rel}")
+    # Multiple patches target the same file. Always apply the next patch
+    # to the in-memory version so earlier changes are never overwritten.
+    src = pending.get(rel)
+    if src is None:
+        src = p.read_text(encoding="utf-8")
+    if new in src:
+        pending[rel] = src
+    elif src.count(old) == 1:
+        pending[rel] = src.replace(old, new, 1)
+    else:
+        raise SystemExit(
+            f"[turnip] {label}: anchor count {src.count(old)} in {rel}; no files written"
+        )
+for rel, src in pending.items():
+    (root / rel).write_text(src, encoding="utf-8")
 # Verify using stable markers rather than requiring the entire inserted block
 # to remain byte-identical (formatting/line-ending changes are harmless).
 markers = {
