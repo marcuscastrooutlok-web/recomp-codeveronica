@@ -2164,3 +2164,13 @@ A afirmação anterior de que um APK comum não poderia carregar Turnip e que se
 - Causa identificada no script: várias alterações dirigidas ao mesmo arquivo eram preparadas a partir do conteúdo original e a última sobrescrevia as anteriores.
 - Corrigido para acumular as alterações sequencialmente em memória por arquivo antes de gravar. Commit: `d031d16db3aba26dfe9d34e9d6e9119f30374409`.
 - Próxima verificação: o workflow Android ARM64 deve executar novamente; ainda não há confirmação de patch aplicado, configuração CMake ou compilação.
+
+
+### Resultado do probe Android ARM64 com Turnip — 2026-11-25
+
+- Workflow [Android ARM64 platform probe #7](https://github.com/marcuscastrooutlok-web/recomp-codeveronica/actions/runs/45663408912) concluído com sucesso no commit `d031d16db3aba26dfe9d34e9d6e9119f30374409`.
+- A etapa `Prepare pinned libadrenotools and apply Turnip SDK integration` passou; o patch sequencial permaneceu aplicado, incluindo o cabeçalho `adrenotools/driver.h` em `vulkan_instance.cpp`.
+- A configuração CMake Android ARM64 passou e a compilação integral do SDK ReXGlue terminou: `Android ARM64 SDK compilation: SUCCESS` (805 etapas Ninja; artefatos nativos incluindo `libmain_hook.so`, `libfile_redirect_hook.so`, `libgsl_alloc_hook.so` e `librexgpu-xenos.so`).
+- Artefato de diagnóstico: [recvx-android-arm64-probe](https://github.com/marcuscastrooutlok-web/recomp-codeveronica/actions/runs/45663408912/artifacts/15047205191), ID `15047205191`. O artefato contém logs e saídas do probe, não é APK.
+- Limite: esta execução valida o patch e a compilação do SDK Android ARM64 com libadrenotools; NÃO compila APK do jogo, não integra ainda o importador/seleção Turnip na launcher e não prova que um dos três drivers R7 carregue no Adreno 730.
+- Próxima etapa concreta: adaptar o workflow de APK real para compilar/empacotar os hooks libadrenotools em `nativeLibraryDir` e depois ligar o importador ZIP/cvars ao processo do jogo, mantendo fallback e logs explícitos. Não declarar Turnip ativo até confirmar o carregamento no aparelho.
