@@ -1,8 +1,10 @@
 # CONTINUIDADE DO PROJETO — Resident Evil Code Veronica X
 
-**Localização canônica:** `joaovitoroutlok821-dot/recomp-codeveronica` · branch `android-rebuild` · arquivo `CONTINUATION.md`.
+**Localização canônica atual:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · arquivo `CONTINUATION.md`.
 
-Última atualização: 2026-11-04
+**Histórico anterior:** o conteúdo abaixo preserva notas da conta `joaovitoroutlok821-dot`; elas são históricas e não indicam o repositório atual de trabalho.
+
+Última atualização: 2026-11-25
 
 ## Estado da reconstrução nesta conta
 
@@ -2105,3 +2107,52 @@ A afirmação anterior de que um APK comum não poderia carregar Turnip e que se
 2. Conferir os nomes/saídas dos hooks no build de libadrenotools e adicioná-los ao empacotamento do APK real.
 3. Integrar importador ZIP seguro com leitura de `libraryName` do `meta.json`, persistência da seleção e cvars de inicialização.
 4. Confirmar no log driver carregado ou fallback antes de declarar Turnip ativo.
+
+
+## Continuidade — integração Turnip/libadrenotools (2026-11-25)
+
+**Repositório ativo:** https://github.com/marcuscastrooutlok-web/recomp-codeveronica  
+**Branch:** `android-rebuild`  
+**Arquivo de continuidade:** [CONTINUATION.md](https://github.com/marcuscastrooutlok-web/recomp-codeveronica/blob/android-rebuild/CONTINUATION.md)
+
+### Descoberta técnica confirmada
+
+- A referência `victorgbd/NFSMW-Recompiled-Mobile` demonstra carregamento de drivers Vulkan customizados em Android sem root, via `libadrenotools`.
+- O carregador exige que `hookLibDir` seja exatamente `ApplicationInfo.nativeLibraryDir`; o diretório do driver customizado deve ficar no armazenamento interno privado do app, nunca no armazenamento compartilhado.
+- A integração deve empacotar os hooks corretamente com `useLegacyPackaging = true`; o carregamento deve acontecer antes de qualquer chamada Vulkan.
+- A função oficial `adrenotools_open_libvulkan` recebe o handle e usa `ADRENOTOOLS_DRIVER_CUSTOM`; o fallback para o Vulkan do sistema deve ser registrado claramente.
+- Documentação da API: https://github.com/bylaws/libadrenotools/blob/master/include/adrenotools/driver.h
+
+### Pacotes Turnip recebidos
+
+- `Turnip_v26.0.0_R7.zip`
+- `Turnip_v26.0.0_R7_Gmem.zip`
+- `Turnip_v26.0.0_R7_Sysmem.zip`
+- Os três incluem `meta.json` e uma biblioteca Vulkan ARM64. Os binários padrão e Sysmem foram identificados como idênticos; GMEM é diferente. Manter as opções separadas na interface, sem afirmar diferença binária entre padrão e Sysmem.
+- Metadados reportados: Mesa Turnip v26.0.0 R7, Vulkan 1.4.335, API mínima 27.
+- Ainda não foi comprovado que qualquer variante inicia corretamente no Adreno 730 do Edge 30 Pro.
+
+### Patch e falha atual
+
+- Criado `scripts/ensure-rexglue-turnip.py` para adaptar o SDK fixado em `398e2ba7802d0c4ca1f68d7ad4fa2cd73e8123eb`.
+- `libadrenotools` fixado em `8fae8ce254dfc1344527e05301e43f37dea2df80`.
+- Primeira execução do workflow `Android ARM64 platform probe`, run [45501628145](https://github.com/marcuscastrooutlok-web/recomp-codeveronica/actions/runs/45501628145), falhou no pós-check do script, com mensagem `post-patch verification failed: adrenotools headers`. O CMake configure e a compilação não chegaram a executar.
+- Corrigida a validação do script para usar marcadores estáveis em vez de comparar o bloco inteiro. Commit: `ea209b25c270318b10335a44bf9f1f1197ba767d`.
+- Incluído `scripts/ensure-rexglue-turnip.py` nos filtros de push do workflow para que alterações futuras nesse script acionem o probe. Commit: `93300557bdee29107b80892b8fe6e6ad31b877e0`.
+- A correção do verificador ainda precisa ser confirmada por uma nova execução; não declarar integração compilada nem APK produzido.
+
+### Próximas ações objetivas
+
+1. Conferir a nova execução do workflow após os commits acima.
+2. Se a etapa de patch passar, corrigir erros reais de CMake/NDK e compilar o SDK ARM64.
+3. Integrar no APK real: Gradle com empacotamento compatível, bibliotecas hook em `nativeLibraryDir`, importação segura do ZIP, leitura de `libraryName` do `meta.json`, extração no armazenamento privado e persistência da seleção.
+4. Passar os diretórios/cvars à Activity do jogo antes da inicialização Vulkan.
+5. Adicionar logs inequívocos: driver customizado carregado ou fallback para driver do sistema.
+6. Testar separadamente R7 padrão, GMEM e Sysmem no Edge 30 Pro. Não presumir que resultados de Adreno 830/Gen8 se aplicam ao Adreno 730.
+
+### Regras de preservação
+
+- Não substituir nem simplificar a launcher personalizada existente.
+- Não regredir as correções da compilação #48; ela continua sendo a referência visual/funcional indicada pelo usuário.
+- Não incluir `Default.xex` nem arquivos protegidos no repositório ou APK público.
+- Esta etapa ainda é integração de infraestrutura Vulkan; não altera nem valida sombras, FPS, controles ou desempenho do jogo.
