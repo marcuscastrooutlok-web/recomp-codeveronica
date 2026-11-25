@@ -2156,3 +2156,11 @@ A afirmação anterior de que um APK comum não poderia carregar Turnip e que se
 - Não regredir as correções da compilação #48; ela continua sendo a referência visual/funcional indicada pelo usuário.
 - Não incluir `Default.xex` nem arquivos protegidos no repositório ou APK público.
 - Esta etapa ainda é integração de infraestrutura Vulkan; não altera nem valida sombras, FPS, controles ou desempenho do jogo.
+
+
+### Correção adicional do patch Turnip — 2026-11-25
+
+- A segunda execução do Android probe, [run 45600140396](https://github.com/marcuscastrooutlok-web/recomp-codeveronica/actions/runs/45600140396), voltou a falhar na verificação: o cabeçalho `adrenotools/driver.h` não permanecia no arquivo `vulkan_instance.cpp`.
+- Causa identificada no script: várias alterações dirigidas ao mesmo arquivo eram preparadas a partir do conteúdo original e a última sobrescrevia as anteriores.
+- Corrigido para acumular as alterações sequencialmente em memória por arquivo antes de gravar. Commit: `d031d16db3aba26dfe9d34e9d6e9119f30374409`.
+- Próxima verificação: o workflow Android ARM64 deve executar novamente; ainda não há confirmação de patch aplicado, configuração CMake ou compilação.
