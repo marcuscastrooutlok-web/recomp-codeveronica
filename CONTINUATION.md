@@ -2191,3 +2191,15 @@ A afirmação anterior de que um APK comum não poderia carregar Turnip e que se
 - Workflow disparado: [run #20 / 45673210147](https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/45673210147).
 - Último estado consultado: em andamento. Checkout do código público, validação do XEX e preparação inicial concluídos; instalação de dependências do host em andamento. A etapa de patch do SDK e a compilação Android ainda não foram executadas.
 - Não há APK novo disponível neste momento. Aguardar conclusão e inspecionar logs e conteúdo do APK antes de declarar sucesso.
+
+
+## 2026-11-25 — Correção da origem libadrenotools após falha da compilação privada #20
+
+- Repositório de build: `marcuscastrooutlok-web/recvx-private-build`, branch `main`.
+- Workflow: `.github/workflows/private-android-apk.yml`.
+- Run #20, ID `45673210147`, falhou na etapa 14 (Apply Android ARM64 SDK compatibility patches), antes da compilação Android.
+- Causa exata: o clone de `https://github.com/bytedance/libadrenotools.git` retornou `fatal: could not read Username for 'https://github.com': No such device or address`.
+- Verificação: o repositório público correto é `bylaws/libadrenotools`; o commit fixado `8fae8ce254dfc1344527e05301e43f37dea2df80` existe nele e seu submódulo `lib/linkernsbypass` aponta para `aa3975893d83ef1bc84c321ec60c65fbf1287887`.
+- Correção aplicada no workflow privado: origem alterada para `https://github.com/bylaws/libadrenotools.git` e clone com `--recurse-submodules`, preservando checkout e verificação do commit fixado.
+- Commit do workflow privado: `71a6adce5f0187aefd9948caaef37c8cf085558d`.
+- Ainda não foi disparado novo build; próximo passo é executar e confirmar que a etapa 14 passa e que os hooks são compilados/empacotados. Não há APK novo nem confirmação de Turnip ativo no aparelho.
