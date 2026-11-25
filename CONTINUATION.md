@@ -2184,3 +2184,10 @@ A afirmação anterior de que um APK comum não poderia carregar Turnip e que se
 - Foi habilitado `useLegacyPackaging true` para bibliotecas JNI no Gradle.
 - A alteração ainda não comprova que todos os hooks necessários estejam empacotados, que o APK consiga carregar o driver ou que o Turnip R7 funcione no Adreno 730. A compilação e a inspeção do APK precisam confirmar esses pontos.
 - A importação/seleção de ZIP na launcher ainda não foi implementada nesta etapa. Não declarar a funcionalidade concluída.
+
+### Execução da compilação privada com Turnip — 2026-11-25
+
+- Solicitação de build criada no repositório privado por commit `4248ec6407cded66a34a63c0cdbd4b09ad038a77`, arquivo `.github/build-requests/turnip-integration-2026-11-25.txt`, usando `source_ref=android-rebuild`.
+- Workflow disparado: [run #20 / 45673210147](https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/45673210147).
+- Último estado consultado: em andamento. Checkout do código público, validação do XEX e preparação inicial concluídos; instalação de dependências do host em andamento. A etapa de patch do SDK e a compilação Android ainda não foram executadas.
+- Não há APK novo disponível neste momento. Aguardar conclusão e inspecionar logs e conteúdo do APK antes de declarar sucesso.
