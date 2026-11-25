@@ -2203,3 +2203,16 @@ A afirmação anterior de que um APK comum não poderia carregar Turnip e que se
 - Correção aplicada no workflow privado: origem alterada para `https://github.com/bylaws/libadrenotools.git` e clone com `--recurse-submodules`, preservando checkout e verificação do commit fixado.
 - Commit do workflow privado: `71a6adce5f0187aefd9948caaef37c8cf085558d`.
 - Ainda não foi disparado novo build; próximo passo é executar e confirmar que a etapa 14 passa e que os hooks são compilados/empacotados. Não há APK novo nem confirmação de Turnip ativo no aparelho.
+
+
+## Resultado da compilação privada #21 — 2026-11-25
+
+- Repositório de APK: `marcuscastrooutlok-web/recvx-private-build`, branch `main`.
+- Workflow: [run #21 / 45678290727](https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/45678290727).
+- Commit do run: `c8a07a23c3cde12c341e0e690b6599b6c28b3c51`.
+- Resultado confirmado pela API do GitHub: `status=completed`, `conclusion=success`.
+- Job `android-apk`: sucesso. Todas as etapas concluíram, incluindo validação do XEX privado, checkout da revisão pública, patch Android/Turnip, compilação das bibliotecas nativas ARM64, verificação das bibliotecas do APK, upload dos artefatos e limpeza dos dados privados do runner.
+- Artefato APK: `recvx-private-android-arm64`, ID `15055268154`, tamanho 50.705.184 bytes (~48,3 MiB), SHA-256 `bf64002c0b64ef2846439bd6a1569b09dd5ad9e3110988d1ea95133cb4402e78`, expiração informada: 2026-11-28.
+- Artefato de diagnóstico: `recvx-private-diagnostics`, ID `15055028494`.
+- Limite importante: o workflow prova que o APK foi construído e verificado estruturalmente. Ainda é necessário instalar e testar no Motorola Edge 30 Pro; não há confirmação de que o jogo inicia, de que o driver Turnip R7 foi selecionado/carregado ou de que houve melhoria de FPS/sombras/controles.
+- Próxima ação: disponibilizar o artefato APK ao usuário, instalar no aparelho e recolher logs de inicialização Vulkan/driver. Testar primeiro com driver do sistema e depois cada pacote R7, mantendo o fallback.
