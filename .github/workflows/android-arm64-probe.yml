@@ -12,6 +12,7 @@ on:
       - 'scripts/ensure-rexglue-android-api-level.py'
       - 'scripts/ensure-rexglue-android-thread-name-compat.py'
       - 'scripts/ensure-rexglue-android-content-uri.py'
+      - 'scripts/ensure-rexglue-turnip.py'
       - 'generated/rexglue.cmake'
       - 'CMakeLists.txt'
 
