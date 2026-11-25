@@ -2174,3 +2174,13 @@ A afirmação anterior de que um APK comum não poderia carregar Turnip e que se
 - Artefato de diagnóstico: [recvx-android-arm64-probe](https://github.com/marcuscastrooutlok-web/recomp-codeveronica/actions/runs/45663408912/artifacts/15047205191), ID `15047205191`. O artefato contém logs e saídas do probe, não é APK.
 - Limite: esta execução valida o patch e a compilação do SDK Android ARM64 com libadrenotools; NÃO compila APK do jogo, não integra ainda o importador/seleção Turnip na launcher e não prova que um dos três drivers R7 carregue no Adreno 730.
 - Próxima etapa concreta: adaptar o workflow de APK real para compilar/empacotar os hooks libadrenotools em `nativeLibraryDir` e depois ligar o importador ZIP/cvars ao processo do jogo, mantendo fallback e logs explícitos. Não declarar Turnip ativo até confirmar o carregamento no aparelho.
+
+## Integração Turnip no workflow privado — 2026-11-25
+
+- Repositório de APK: `marcuscastrooutlok-web/recvx-private-build`, branch `main`.
+- Workflow alterado: `.github/workflows/private-android-apk.yml`.
+- Commit: `9ff88a8b9694004110587a03a2e682e8a141d894`.
+- O workflow agora clona `bytedance/libadrenotools` no commit fixo `8fae8ce254dfc1344527e05301e43f37dea2df80`, verifica o SHA e executa `scripts/ensure-rexglue-turnip.py` contra o mesmo SDK ReXGlue que será usado no APK.
+- Foi habilitado `useLegacyPackaging true` para bibliotecas JNI no Gradle.
+- A alteração ainda não comprova que todos os hooks necessários estejam empacotados, que o APK consiga carregar o driver ou que o Turnip R7 funcione no Adreno 730. A compilação e a inspeção do APK precisam confirmar esses pontos.
+- A importação/seleção de ZIP na launcher ainda não foi implementada nesta etapa. Não declarar a funcionalidade concluída.
