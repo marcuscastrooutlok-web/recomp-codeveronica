@@ -2229,3 +2229,16 @@ A afirmação anterior de que um APK comum não poderia carregar Turnip e que se
 - Estado: nenhuma correção de sombras foi aplicada nesta atualização; nenhum novo APK foi compilado.
 
 **Local do registro:** marcuscastrooutlok-web/recomp-codeveronica · branch android-rebuild · CONTINUATION.md.
+
+
+## Preparação e disparo da APK diagnóstica de sombras #22 — 2026-11-25
+
+- A branch android-shadows-diagnostics do SDK contém exatamente quatro commits à frente do SDK base 398e2ba7802d0c4ca1f68d7ad4fa2cd73e8123eb, sem commits divergentes. HEAD diagnóstico: 4ef8d03eabd318de2c77d5778de352ce0ccd34f9.
+- Essa revisão contém a instrumentação Vulkan de diagnóstico de sombras já usada na #19: registros limitados de SHADOW_BIND_DIAG e diagnósticos de estado depth/stencil. É instrumentação observacional; não é uma correção visual.
+- Atualizado o workflow privado marcuscastrooutlok-web/recvx-private-build, branch main, arquivo .github/workflows/private-android-apk.yml, para buscar e fixar explicitamente o SDK diagnóstico 4ef8d03eabd318de2c77d5778de352ce0ccd34f9 antes de reaplicar a integração Android/Turnip da #21. Commit do workflow: 9877c880395927c900165787e0db42a319e45786.
+- Criado pedido privado .github/build-requests/shadow-diagnostics-2026-11-25.txt, apontando para o código RECVX android-rebuild no commit 14d2c5e738123d0be9faa0ba6dd680cf508ea9c9. Commit do pedido: ecd44b97737b403964b80a74b3827b58d6fdf541.
+- Workflow privado disparado: #22, run ID 45736147320, URL https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/45736147320. No último estado consultado estava queued; ainda não há resultado de compilação nem APK confirmado.
+- Objetivo da #22: manter a linha funcional #21 e coletar os diagnósticos de bindings/texturas e depth/stencil no aparelho. Depois de instalar, reproduzir a mesma cena sem sombras e enviar o recvx.log atualizado. Só com a binding realmente usada pelo draw identificado será feita uma correção específica.
+- Não declarar sombras corrigidas: nenhuma alteração de comportamento gráfico foi feita; a #22 é diagnóstica.
+
+Local deste registro: marcuscastrooutlok-web/recomp-codeveronica · branch android-rebuild · CONTINUATION.md.
