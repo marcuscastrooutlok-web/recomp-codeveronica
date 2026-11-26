@@ -2242,3 +2242,15 @@ A afirmação anterior de que um APK comum não poderia carregar Turnip e que se
 - Não declarar sombras corrigidas: nenhuma alteração de comportamento gráfico foi feita; a #22 é diagnóstica.
 
 Local deste registro: marcuscastrooutlok-web/recomp-codeveronica · branch android-rebuild · CONTINUATION.md.
+
+
+## Resultado da compilação diagnóstica #22 — 2026-11-25
+
+- Workflow privado #22 (run ID `45736147320`) concluiu com `success`; job `android-apk` concluído com sucesso.
+- APK `recvx-private-android-arm64`, artifact ID `15081586062`, tamanho 50,706,973 bytes (~48,3 MiB), SHA-256 `d9eb2626c953678d2566be099f5c6860f1586f69ddfcde53c85c76961cc5ff1c`. Expira em 2026-11-29 02:15:33Z.
+- Diagnósticos `recvx-private-diagnostics`, artifact ID `15081785324`, tamanho 88,215 bytes, SHA-256 `52ee6799624c53fb8a09490efc90486fb98d942c042e033731b9597574d71602`. Expira em 2026-12-03 02:15:36Z.
+- Run: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/45736147320
+- A conclusão `success` confirma que o APK e os diagnósticos foram produzidos; ainda não confirma que as sombras foram corrigidas nem que o diagnóstico foi validado no aparelho. A próxima validação é instalar a #22, reproduzir a mesma cena e obter `recvx.log`/diagnostics do dispositivo.
+- Não aplicar correção de shader ou depth/stencil antes de correlacionar o descriptor usado no draw com os logs.
+
+**Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
