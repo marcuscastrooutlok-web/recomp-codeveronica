@@ -2254,3 +2254,18 @@ Local deste registro: marcuscastrooutlok-web/recomp-codeveronica · branch andro
 - Não aplicar correção de shader ou depth/stencil antes de correlacionar o descriptor usado no draw com os logs.
 
 **Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
+
+
+## Análise dos logs enviados da APK diagnóstica #22 — 2026-11-25
+
+- Arquivo recebido: logs.zip (17 arquivos: recvx.log e recvx.1.log a recvx.16.log; cerca de 84 MB descompactados). Os diagnósticos específicos da execução de 25/11 estão concentrados em recvx.16.log.
+- Identificação Vulkan do dispositivo: Adreno (TM) 730, API 1.1.128, vendor 0x5143, device 0x7030001, driver version 0x80267000. Essa identificação é consistente com o driver Qualcomm do sistema, não com a versão Turnip R7 informada nos ZIPs (Vulkan 1.4.335). Conclusão operacional: não há evidência de que o carregador customizado tenha ativado Turnip; o log sugere que o app iniciou com o driver de sistema. A seleção/importação e o carregamento real do Turnip continuam não validados.
+- Renderização: [RECVX-VK-DIAG] final render-target path: FBO; FSI=false, sample/pixel interlock=false; fragment stores/atomics=true; sample-rate shading=true; standard sample locations=true; D24_UNORM_S8 sampled+depth attachment=true; 2x MSAA attachments=true. Diagnóstico complementar SHADOW_DIAG: path=0 (FBO), FSI supported=0, D24S8 sampled+depth attachment supported=1, depth optimal features 0x0001F601.
+- Foram registrados 48 snapshots de pipeline (pipeline[0] a pipeline[47]) e 64 eventos RECVX-DEPTH-TRANSFER. Há pipelines com depth attachment e depth test/write ativos (ex.: pipeline[0], render_pass 0x86, depth_attachment=1, depth_test=1, depth_write=1, compare=7, stencil_test=1); também há outros sem depth attachment. Isso confirma que há uso de estados e transferências de profundidade, mas não identifica por si só qual pipeline é o passe de shadow map nem prova que a textura de sombra é consumida corretamente.
+- ps=0000000000000000 aparece em snapshots coletados durante criação/compilação do pipeline; não concluir shader ausente só por esses registros, pois há snapshots posteriores do mesmo VS com PS não nulo.
+- O arquivo contém 16.221 mensagens repetidas Vulkan invalid (1110) ... VKDBGUTILWARN003, todas apontando para a mesma advertência genérica de validação/performance do Adreno Game Developer Guide. A mensagem detalhada não está presente no log capturado. O volume de spam é excessivo e pode contaminar o desempenho/diagnóstico; limitar/deduplicar a saída na próxima build de diagnóstico, sem suprimir erros Vulkan reais.
+- Não apareceu SHADOW_BIND_DIAG em texto; esta revisão gerou SHADOW_DIAG e RECVX-DEPTH-TRANSFER. Portanto, não repetir a conclusão antiga image_view_valid=false como se tivesse sido observada neste teste.
+- Próxima correção técnica: instrumentar a associação de descriptor/image view no ponto de bind do draw e correlacionar com os pipelines identificados; incluir rótulos/IDs de shader e recursos de textura/formatos/subresources, além do resultado de view creation. Em paralelo, corrigir a seleção do driver para que o log imprima explicitamente o caminho/handle e driverName, driverInfo, apiVersion obtidos de VkPhysicalDeviceProperties. Reduzir os 16k logs repetidos de validation para contagem + primeira ocorrência + mensagem completa, mantendo severidade real.
+- Não foi aplicada correção visual de sombras; este arquivo apenas permite estreitar o diagnóstico. APK #22 executa, mas a ausência de sombras ainda não foi resolvida.
+
+Local deste registro: marcuscastrooutlok-web/recomp-codeveronica · branch android-rebuild · CONTINUATION.md.
