@@ -100,7 +100,7 @@ body{display:grid;place-items:center}.stage{position:relative;width:min(100vw,17
 <footer class="footer"><span class="yellow" id="directory">▱ Diretório do jogo: Não selecionado</span><span>♧ Controle: <b class="red">Desconectado</b></span><span>♧ Controles na tela: <b class="green">Ativado</b></span><span>Versão: v1.0.0</span></footer><div class="cursorHalo" id="halo"></div><div class="toast" id="toast"></div></main><div class="rotate">Para visualizar como na referência, gire o celular na horizontal.</div>
 <script>
 const body=document.getElementById('pagebody'),heading=document.getElementById('heading');let activeTab='graphics';
-const tabNames={graphics:'Gráficos',performance:'Desempenho',controls:'Controles',audio:'Áudio'};
+const tabNames={graphics:'Gráficos',performance:'Desempenho',controls:'Controles',audio:'Áudio',drivers:'Drivers'};
 function field(label,control){
  const supported=['Resolução de saída','Contador de FPS','Controles na tela','Modo de apresentação (V-Sync)','Compilação assíncrona de shaders'].includes(label);
  if(!supported) control=control.replace('<select','<select disabled title="Indisponível: sem suporte confirmado"').replace('<input','<input disabled title="Indisponível: sem suporte confirmado"').replace('<button class="toggle','<button disabled class="toggle');
@@ -137,6 +137,11 @@ function settings(){
   left=rows([['Dispositivo de controle',select('Controle Bluetooth|Controles na tela|Automático')],['Perfil de controle',select('Padrão (Xbox 360)|Alternativo')],['Vibração (Rumble)',toggle(true)],['Inverter eixo Y (Câmera)',toggle(false)],['Sensibilidade da câmera',slider(50)],['Zona morta do analógico',slider(10)],['Tipo de controle na tela',select('Clássico (Dual Stick)|Compacto')],['Controles na tela',toggle(true)],['Tamanho dos botões (tela)',slider(100)],['Transparência dos botões',slider(70)]]);
   right=`<div style="text-align:center;font-size:clamp(30px,5vw,72px);line-height:1.1">🎮</div><div class="hint" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><span>LT — Mirar / Preparar</span><span>RT — Atacar / Ação</span><span>LB — Mapa</span><span>RB — Correr</span><span>Y — Inventário</span><span>X — Recarga</span><span>B — Cancelar / Voltar</span><span>A — Confirmar / Ação</span><span>L — Mover Personagem</span><span>R — Mover Câmera</span></div><div class="value" style="margin-top:8px;white-space:normal">Direcional (D-Pad): ↑ Seleção Rápida (Cima) · ↓ Seleção Rápida (Baixo) · ← Girar Item (Esquerda) · → Girar Item (Direita)<br><br>Botões de Sistema: ☰ Pausa / Menu · ◉ Status / Arquivos</div>`;
  }
+ if(activeTab==='drivers'){
+  leftTitle='Driver Vulkan';rightTitle='Gerenciar drivers';
+  left='<div class="setting"><span>Driver ativo</span><select id="gpuDriverSelect" onchange="selectGpuDriver(this.value)"><option value="system">Driver do sistema</option></select></div><p class="hint">A escolha será aplicada na próxima inicialização do jogo. O driver do sistema permanece disponível como fallback.</p>';
+  right='<button class="action primary" onclick="chooseGpuDriver()">＋ Importar pacote ZIP</button><div id="gpuDriverList" class="hint" style="margin-top:12px">Carregando drivers instalados…</div><p class="hint">Pacote: ZIP com meta.json e uma biblioteca Vulkan .so compatível com Android ARM64/Adreno.</p>';
+ }
  if(activeTab==='audio'){
   leftTitle='Configurações de Áudio';rightTitle='Opções de Áudio';
   left=rows([['Volume geral',slider(100)],['Volume da música',slider(80)],['Volume dos efeitos (SFX)',slider(100)],['Volume das vozes',slider(100)],['Volume das cutscenes',slider(100)]]);
@@ -144,8 +149,56 @@ function settings(){
  }
  body.innerHTML=tabs()+`<div class="panes"><div class="pane"><h2>${leftTitle}</h2>${left}</div><div class="pane"><h2>${rightTitle}</h2>${right}</div></div><div class="actions"><button class="action" onclick="restoreDefaults()">↶ &nbsp; Restaurar padrões</button><button class="action primary" onclick="applySettings()">✓ &nbsp; Aplicar</button></div>`;
  body.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;settings()});
+ if(activeTab==='drivers') refreshGpuDrivers();
  restoreSettings();
 }
+
+function chooseGpuDriver(){
+ if(window.GameBridge && GameBridge.chooseDriverArchive) GameBridge.chooseDriverArchive();
+ else toast('Importação disponível somente no aplicativo Android');
+}
+function refreshGpuDrivers(){
+ if(!window.GameBridge || !GameBridge.getInstalledDrivers) return;
+ try{
+  const drivers=JSON.parse(GameBridge.getInstalledDrivers()||'[]');
+  const selected=GameBridge.getSelectedDriver()||'system';
+  const select=document.getElementById('gpuDriverSelect');
+  const list=document.getElementById('gpuDriverList');
+  if(!select||!list)return;
+  select.innerHTML='';
+  drivers.forEach(function(d){
+   const option=document.createElement('option');
+   option.value=d.id; option.textContent=d.label||d.name||d.id;
+   select.appendChild(option);
+  });
+  select.value=selected;
+  list.innerHTML='';
+  drivers.forEach(function(d){
+   if(d.id==='system')return;
+   const row=document.createElement('div');
+   row.className='setting';
+   const name=document.createElement('span');
+   name.textContent=d.label||d.name||d.id;
+   const remove=document.createElement('button');
+   remove.className='action'; remove.textContent='Remover';
+   remove.onclick=function(){removeGpuDriver(d.id)};
+   row.appendChild(name);row.appendChild(remove);list.appendChild(row);
+  });
+  if(drivers.length<=1)list.textContent='Nenhum driver personalizado instalado.';
+ }catch(e){toast('Não foi possível carregar a lista de drivers.')}
+}
+function selectGpuDriver(id){
+ if(!window.GameBridge)return;
+ if(GameBridge.selectDriver(id)){toast('Driver selecionado. Reinicie o jogo para aplicar.')}
+ else toast('Não foi possível selecionar esse driver.');
+}
+function removeGpuDriver(id){
+ if(!window.GameBridge)return;
+ if(GameBridge.removeDriver(id)){toast('Driver removido.');refreshGpuDrivers()}
+ else toast('Não foi possível remover esse driver.');
+}
+window.onNativeDriversChanged=function(){if(activeTab==='drivers')refreshGpuDrivers()};
+
 function restoreSettings(){
  if(!window.GameBridge) return;
  try{
