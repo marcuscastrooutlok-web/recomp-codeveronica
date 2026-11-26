@@ -2300,3 +2300,8 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - Não foram alterados nesta etapa os diagnósticos de sombras, desempenho, áudio ou controles.
 - Próxima ação: validar a compilação Android gerada pelo workflow privado; corrigir erros de compilação se aparecerem; depois testar importação e seleção com o Turnip R7 e conferir logs de carregamento. O driver do sistema permanece o fallback.
 
+
+
+### Ajuste posterior à primeira implementação
+- Commit `7c2e265990f2add4df7f6f6feb524b5a8a3fe03a`: incluídos os imports `java.io.File` e `java.io.FileInputStream` na atividade SDL para a preparação dos argumentos do driver customizado.
+- Revisão estática confirma os pontos de entrada da importação, listagem, seleção, remoção e cvars Android; a compilação real ainda é necessária para detectar incompatibilidades Java/SDK.
