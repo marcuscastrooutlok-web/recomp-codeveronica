@@ -431,7 +431,7 @@ public final class GameSetupActivity extends Activity {
             }
         } catch (Exception e) { deleteRecursively(staging); throw e; }
         if (!metadata || library == null || library.length() < 65536L ||
-            !library.getName().toLowerCase(java.util.Locale.ROOT).contains("adreno")) {
+            !library.getName().toLowerCase(java.util.Locale.ROOT).endsWith(".so")) {
             deleteRecursively(staging);
             throw new Exception("Formato inválido: inclua meta.json e uma biblioteca Vulkan Adreno ARM64.");
         }
