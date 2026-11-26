@@ -2305,3 +2305,18 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 ### Ajuste posterior à primeira implementação
 - Commit `7c2e265990f2add4df7f6f6feb524b5a8a3fe03a`: incluídos os imports `java.io.File` e `java.io.FileInputStream` na atividade SDL para a preparação dos argumentos do driver customizado.
 - Revisão estática confirma os pontos de entrada da importação, listagem, seleção, remoção e cvars Android; a compilação real ainda é necessária para detectar incompatibilidades Java/SDK.
+
+
+## Resultado da compilação privada #23 — gerenciador de drivers Vulkan — 2026-11-26
+
+- Repositório de APK: `marcuscastrooutlok-web/recvx-private-build`, branch `main`.
+- Pedido de build: `.github/build-requests/driver-manager-20261126.txt`, commit `3c757bfc90280c1394dcae9a6423210c9a3bc1e5`, apontando para o código RECVX em `android-rebuild`, commit `1fb4cd132ae13c89942df527ce4365e0a588eda0`.
+- Workflow privado [#23 / run 45877068621](https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/45877068621) concluiu com `status=completed`, `conclusion=success`. Job `android-apk` e todas as etapas, incluindo compilação ARM64, verificação de bibliotecas e upload, concluíram com sucesso.
+- APK `recvx-private-android-arm64`, artifact ID `15147204147`, tamanho 50.710.295 bytes, SHA-256 `12bb2c53be16fca998d49a003b6efd4c0c6c4104afb9a698019cc076942d10f5`, expiração informada 2026-11-29 19:12:37Z.
+- Diagnósticos `recvx-private-diagnostics`, artifact ID `15147079674`, tamanho 88.145 bytes, expiração 2026-12-03 19:12:40Z.
+- Revisão estática do script confirmou que a WebView registra a ponte como `GameBridge`, a mesma interface chamada pelo HTML; o importador ZIP, listagem, seleção e remoção estão conectados. O código de extração usa diretório privado temporário e validações básicas. O workflow comprova compilação/empacotamento, não valida importação real no aparelho nem ABI/compatibilidade completa de qualquer pacote de driver.
+- O gerenciador inicial aceita ZIP com `meta.json` e exatamente uma biblioteca Vulkan `.so`; não é um formato universal de drivers. A escolha aplica-se ao iniciar novamente o jogo e o driver do sistema permanece como fallback.
+- Próximo teste físico: instalar #23; abrir a aba Drivers; importar um dos ZIPs Turnip R7 fornecidos; selecionar o pacote; fechar e reiniciar o jogo; coletar logs Vulkan para confirmar se o loader customizado foi usado e registrar `driverName`, `driverInfo` e `apiVersion`. Se falhar a importação, registrar a mensagem exata do Toast e não desinstalar a versão anterior funcional.
+- Ainda não há evidência de Turnip efetivamente carregado, ganho de FPS, correção de sombras ou validação de controle/áudio nesta compilação.
+
+**Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
