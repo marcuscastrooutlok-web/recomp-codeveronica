@@ -98,11 +98,15 @@ import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class GameSetupActivity extends Activity {
     private static final int REQUEST_TREE = 4107;
+    private static final int REQUEST_DRIVER_ZIP = 4108;
     private static final String PREFS = "game_setup";
     private static final String PREF_URI = "tree_uri";
     private static final String EXTRA_GAME_ROOT = "org.libsdl.app.GAME_ROOT";
@@ -243,6 +247,50 @@ public final class GameSetupActivity extends Activity {
         }
 
         @android.webkit.JavascriptInterface
+        public void chooseDriverArchive() {
+            runOnUiThread(() -> {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("application/zip");
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivityForResult(intent, REQUEST_DRIVER_ZIP);
+            });
+        }
+
+        @android.webkit.JavascriptInterface
+        public String getInstalledDrivers() { return listDriversJson(); }
+
+        @android.webkit.JavascriptInterface
+        public String getSelectedDriver() {
+            return getSharedPreferences("recvx_settings", MODE_PRIVATE)
+                .getString("gpu_driver_id", "system");
+        }
+
+        @android.webkit.JavascriptInterface
+        public boolean selectDriver(String id) {
+            if ("system".equals(id)) {
+                getSharedPreferences("recvx_settings", MODE_PRIVATE).edit()
+                    .putString("gpu_driver_id", "system").apply();
+                return true;
+            }
+            if (!isSafeDriverId(id) || !new File(new File(getFilesDir(), "gpu_drivers"), id).isDirectory()) return false;
+            getSharedPreferences("recvx_settings", MODE_PRIVATE).edit().putString("gpu_driver_id", id).apply();
+            return true;
+        }
+
+        @android.webkit.JavascriptInterface
+        public boolean removeDriver(String id) {
+            if (!isSafeDriverId(id)) return false;
+            File target = new File(new File(getFilesDir(), "gpu_drivers"), id);
+            deleteRecursively(target);
+            if (id.equals(getSelectedDriver())) {
+                getSharedPreferences("recvx_settings", MODE_PRIVATE).edit()
+                    .putString("gpu_driver_id", "system").apply();
+            }
+            return true;
+        }
+
+        @android.webkit.JavascriptInterface
         public void exitApp() {
             runOnUiThread(() -> finish());
         }
@@ -309,6 +357,23 @@ public final class GameSetupActivity extends Activity {
 
     @Override protected void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
+        if (request == REQUEST_DRIVER_ZIP) {
+            if (result == RESULT_OK && data != null && data.getData() != null) {
+                final Uri archive = data.getData();
+                worker.execute(() -> {
+                    String message;
+                    try { message = "Driver importado: " + importDriverArchive(archive); }
+                    catch (Exception e) { message = "Falha ao importar driver: " + e.getMessage(); }
+                    final String statusMessage = message;
+                    main.post(() -> {
+                        Toast.makeText(GameSetupActivity.this, statusMessage, Toast.LENGTH_LONG).show();
+                        if (launcher != null) launcher.evaluateJavascript(
+                            "window.onNativeDriversChanged && window.onNativeDriversChanged()", null);
+                    });
+                });
+            }
+            return;
+        }
         if (request != REQUEST_TREE || result != RESULT_OK || data == null || data.getData() == null) return;
         Uri tree = data.getData();
         selectedTree = tree;
@@ -320,6 +385,85 @@ public final class GameSetupActivity extends Activity {
         }
         prepareGame(tree);
         publishDirectoryStatus();
+    }
+
+    private static boolean isSafeDriverId(String id) {
+        return id != null && id.matches("[a-f0-9-]{36}");
+    }
+
+    private String importDriverArchive(Uri archive) throws Exception {
+        File root = new File(getFilesDir(), "gpu_drivers");
+        if (!root.exists() && !root.mkdirs()) throw new Exception("Não foi possível criar a pasta de drivers.");
+        String id = UUID.randomUUID().toString();
+        File staging = new File(root, id + ".tmp");
+        if (!staging.mkdirs()) throw new Exception("Não foi possível preparar a importação.");
+        File library = null;
+        boolean metadata = false;
+        long total = 0;
+        try (InputStream raw = getContentResolver().openInputStream(archive);
+             ZipInputStream zip = new ZipInputStream(new java.io.BufferedInputStream(raw))) {
+            if (raw == null) throw new Exception("Arquivo ZIP inacessível.");
+            ZipEntry entry;
+            byte[] buffer = new byte[32768];
+            while ((entry = zip.getNextEntry()) != null) {
+                String name = entry.getName();
+                if (name == null || name.startsWith("/") || name.contains("\\") ||
+                    name.split("/").length > 8 || name.contains("../")) throw new Exception("Caminho inválido no ZIP.");
+                if (entry.isDirectory()) continue;
+                String base = name.substring(name.lastIndexOf('/') + 1);
+                if ("meta.json".equalsIgnoreCase(base)) metadata = true;
+                if (base.toLowerCase(java.util.Locale.ROOT).endsWith(".so")) {
+                    if (library != null) throw new Exception("O pacote deve conter apenas uma biblioteca .so.");
+                    if (!base.matches("[A-Za-z0-9_.+-]+")) throw new Exception("Nome de biblioteca inválido.");
+                    library = new File(staging, base);
+                } else if (!"meta.json".equalsIgnoreCase(base)) continue;
+                File out = new File(staging, "meta.json".equalsIgnoreCase(base) ? "meta.json" :
+                    (library == null ? "driver.so" : library.getName()));
+                try (FileOutputStream stream = new FileOutputStream(out)) {
+                    int count;
+                    while ((count = zip.read(buffer)) != -1) {
+                        total += count;
+                        if (total > 150L * 1024L * 1024L) throw new Exception("Pacote excede 150 MB.");
+                        stream.write(buffer, 0, count);
+                    }
+                }
+                if (out.getName().endsWith(".so")) library = out;
+            }
+        } catch (Exception e) { deleteRecursively(staging); throw e; }
+        if (!metadata || library == null || library.length() < 65536L ||
+            !library.getName().toLowerCase(java.util.Locale.ROOT).contains("adreno")) {
+            deleteRecursively(staging);
+            throw new Exception("Formato inválido: inclua meta.json e uma biblioteca Vulkan Adreno ARM64.");
+        }
+        org.json.JSONObject info = new org.json.JSONObject();
+        info.put("id", id);
+        info.put("name", library.getName());
+        info.put("label", "Driver " + library.getName());
+        try (FileOutputStream out = new FileOutputStream(new File(staging, "driver.json"))) {
+            out.write(info.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        }
+        File destination = new File(root, id);
+        if (!staging.renameTo(destination)) { deleteRecursively(staging); throw new Exception("Não foi possível finalizar a instalação."); }
+        return library.getName();
+    }
+
+    private String listDriversJson() {
+        org.json.JSONArray list = new org.json.JSONArray();
+        org.json.JSONObject system = new org.json.JSONObject();
+        try { system.put("id", "system"); system.put("label", "Driver do sistema"); list.put(system); } catch (Exception ignored) {}
+        File root = new File(getFilesDir(), "gpu_drivers");
+        File[] dirs = root.listFiles();
+        if (dirs != null) for (File dir : dirs) {
+            if (!dir.isDirectory() || !isSafeDriverId(dir.getName())) continue;
+            File meta = new File(dir, "driver.json");
+            try {
+                byte[] bytes = new byte[(int)Math.min(meta.length(), 8192)];
+                try (FileInputStream in = new FileInputStream(meta)) { in.read(bytes); }
+                org.json.JSONObject item = new org.json.JSONObject(new String(bytes, java.nio.charset.StandardCharsets.UTF_8).trim());
+                list.put(item);
+            } catch (Exception ignored) {}
+        }
+        return list.toString();
     }
 
     private void prepareGame(Uri tree) {
@@ -609,6 +753,25 @@ public final class GameSDLActivity extends SDLActivity
         args.add(presentMode == 2 ? "--vulkan_allow_present_mode_fifo_relaxed" : "--no-vulkan_allow_present_mode_fifo_relaxed");
         args.add(prefs.getBoolean("async_shader_compilation", true)
             ? "--async_shader_compilation" : "--no-async_shader_compilation");
+        String driverId = prefs.getString("gpu_driver_id", "system");
+        if (!"system".equals(driverId) && driverId.matches("[a-f0-9-]{36}")) {
+            File driverDir = new File(new File(getFilesDir(), "gpu_drivers"), driverId);
+            File metadata = new File(driverDir, "driver.json");
+            try (FileInputStream in = new FileInputStream(metadata)) {
+                byte[] bytes = new byte[(int)Math.min(metadata.length(), 8192)];
+                int count = in.read(bytes);
+                org.json.JSONObject driver = new org.json.JSONObject(new String(bytes, 0, count, java.nio.charset.StandardCharsets.UTF_8));
+                String library = driver.getString("name");
+                if (new File(driverDir, library).isFile()) {
+                    args.add("--android_gpu_driver_dir=" + driverDir.getAbsolutePath());
+                    args.add("--android_gpu_driver_name=" + library);
+                    args.add("--android_native_lib_dir=" + getApplicationInfo().nativeLibraryDir);
+                    args.add("--android_tmp_dir=" + getCacheDir().getAbsolutePath());
+                }
+            } catch (Exception e) {
+                Log.e("RECVX-DRIVER", "Selected custom driver is unavailable; using system Vulkan", e);
+            }
+        }
         return args.toArray(new String[0]);
     }
 
