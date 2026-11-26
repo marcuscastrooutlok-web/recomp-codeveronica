@@ -720,6 +720,8 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 
 public final class GameSDLActivity extends SDLActivity
