@@ -2216,3 +2216,16 @@ A afirmação anterior de que um APK comum não poderia carregar Turnip e que se
 - Artefato de diagnóstico: `recvx-private-diagnostics`, ID `15055028494`.
 - Limite importante: o workflow prova que o APK foi construído e verificado estruturalmente. Ainda é necessário instalar e testar no Motorola Edge 30 Pro; não há confirmação de que o jogo inicia, de que o driver Turnip R7 foi selecionado/carregado ou de que houve melhoria de FPS/sombras/controles.
 - Próxima ação: disponibilizar o artefato APK ao usuário, instalar no aparelho e recolher logs de inicialização Vulkan/driver. Testar primeiro com driver do sistema e depois cada pacote R7, mantendo o fallback.
+
+
+## Teste físico da compilação privada #21 — sombras ainda ausentes (2026-11-25)
+
+- O usuário instalou e executou a APK privada #21 no Motorola Edge 30 Pro. O jogo inicia, renderiza a cena e exibe o overlay/controles; contador observado nas capturas: 12,9 a 25,7 FPS.
+- Confirmação do usuário: **as sombras continuam ausentes**. A integração Turnip/libadrenotools da #21 não deve ser tratada como correção de sombras; também não há confirmação visual de que um driver Turnip R7 tenha sido efetivamente carregado.
+- A #21 passa a ser referência de execução funcional para a próxima etapa, mas não substitui a #48 como referência histórica/diagnóstica sem comparação deliberada.
+- Evidência diagnóstica anterior registrada neste arquivo: a #19, baseada na branch android-shadows-diagnostics do SDK, emitiu 128 eventos SHADOW_BIND_DIAG de barreira e 128 de descriptor. Foram observadas bindings signed=true com image_view_valid=false; isso é uma pista, mas não prova que a variante signed seja a usada pelo shader de sombras. Os logs também mostraram transferências de profundidade em vários modos, sem identificar semanticamente o recurso como shadow map.
+- Diferença importante: a compilação #21 usou o SDK pin 398e2ba7802d0c4ca1f68d7ad4fa2cd73e8123eb; não há evidência de que ela inclua a instrumentação da branch android-shadows-diagnostics (4ef8d03eabd318de2c77d5778de352ce0ccd34f9). Portanto, não inferir que a #21 repetiu ou descartou a pista das views signed.
+- Próxima ação técnica objetiva: integrar à linha ativa de build a instrumentação limitada já existente de SHADOW_BIND_DIAG/depth-stencil, confirmar no relatório o SHA exato do SDK e produzir uma APK diagnóstica baseada no fluxo funcional #21. No log do aparelho, correlacionar o descriptor efetivamente usado no draw com a imagem/view e o estado depth/stencil. Só então corrigir a criação/seleção da view ou o binding específico, se a evidência confirmar a falha. Não forçar FSI, não trocar formato depth, não reduzir qualidade e não aplicar workaround genérico.
+- Estado: nenhuma correção de sombras foi aplicada nesta atualização; nenhum novo APK foi compilado.
+
+**Local do registro:** marcuscastrooutlok-web/recomp-codeveronica · branch android-rebuild · CONTINUATION.md.
