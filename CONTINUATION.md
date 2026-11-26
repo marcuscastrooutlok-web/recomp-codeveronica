@@ -2269,3 +2269,34 @@ Local deste registro: marcuscastrooutlok-web/recomp-codeveronica · branch andro
 - Não foi aplicada correção visual de sombras; este arquivo apenas permite estreitar o diagnóstico. APK #22 executa, mas a ausência de sombras ainda não foi resolvida.
 
 Local deste registro: marcuscastrooutlok-web/recomp-codeveronica · branch android-rebuild · CONTINUATION.md.
+
+
+## 2026-11-26 — Gerenciador de drivers Vulkan na launcher (implementação inicial)
+
+**Repositório:** `marcuscastrooutlok-web/recomp-codeveronica`  
+**Branch:** `android-rebuild`
+
+Foram gravadas duas alterações para integrar gerenciamento de drivers customizados à launcher Android:
+
+- `scripts/install-android-game-setup.py` — commit `c185ba1001575d6b4ac5816d33b5e02bf507d7c8` e ajuste de compatibilidade `838ce3a5d1f88dfa78ea62cd66aae9daf5b9346e`.
+- `assets/launcher/index.html` — commit `0e87afa16f63b1769fb1b5fcaefc6a2e2b94c41c`.
+
+### O que foi implementado
+
+- Ponte nativa Android para abrir seletor de ZIP pelo Storage Access Framework.
+- Extração para armazenamento privado do aplicativo, com diretório temporário, validação básica de caminhos e limite de 150 MB.
+- Exigência de `meta.json` e exatamente uma biblioteca `.so` com tamanho mínimo.
+- Listagem de driver do sistema e drivers importados.
+- Seleção persistida em `recvx_settings.gpu_driver_id`; remover o driver atualmente selecionado restaura automaticamente o driver do sistema.
+- Aba Drivers na área de configurações da launcher, com importação, seleção e remoção.
+- Passagem das cvars init-only `android_gpu_driver_dir`, `android_gpu_driver_name`, `android_native_lib_dir` e `android_tmp_dir` ao iniciar o jogo. A seleção só entra em vigor na próxima inicialização do jogo.
+
+### Limitações e validações pendentes
+
+- Esta é a primeira implementação e ainda **não foi compilada nem testada no aparelho**.
+- O importador atualmente aceita pacotes ZIP com `meta.json` e uma única biblioteca Vulkan `.so`; não é um instalador universal de qualquer formato de driver.
+- A validação de arquitetura/ABI e compatibilidade Vulkan do binário precisa ser confirmada antes de carregá-lo. A importação não prova que o driver será carregado.
+- A seleção do driver precisa ser confirmada nos logs Vulkan do aparelho, incluindo nome/versão/API do driver e confirmação do caminho carregado.
+- Não foram alterados nesta etapa os diagnósticos de sombras, desempenho, áudio ou controles.
+- Próxima ação: validar a compilação Android gerada pelo workflow privado; corrigir erros de compilação se aparecerem; depois testar importação e seleção com o Turnip R7 e conferir logs de carregamento. O driver do sistema permanece o fallback.
+
