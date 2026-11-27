@@ -2357,3 +2357,14 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - Próxima instrumentação recomendada: logar no início do jogo VkPhysicalDeviceProperties e VkPhysicalDeviceDriverProperties (driverName, driverInfo, vendor/device/API/driver version), além do resultado da abertura do Vulkan customizado via adrenotools; registrar FPS em janelas com timestamp e, se possível, CPU frame time/GPU timestamp query e eventos de pipeline cache. Deduplicar VKDBGUTILWARN003. Não alterar shaders, depth formats, FSI, sombras ou sincronização até identificar o driver e o gargalo.
 
 **Local do registro:** marcuscastrooutlok-web/recomp-codeveronica · branch android-rebuild · CONTINUATION.md.
+
+## Instrumentação explícita de identificação Vulkan — 2026-11-26
+
+- Atualizado `scripts/ensure-rexglue-turnip.py` para inserir no SDK, imediatamente após `vkGetPhysicalDeviceProperties`, um registro `[RECVX-VK-DRIVER]` com `deviceName`, `vendorID`, `deviceID`, `apiVersion` e `driverVersion`.
+- A integração existente já registra sucesso do `adrenotools_open_libvulkan` ou aviso de falha/fallback para Vulkan do sistema. O novo registro complementa essas mensagens com a identidade do dispositivo efetivamente enumerado.
+- Isso resolve a ambiguidade quando `VK_KHR_driver_properties`/propriedades equivalentes não estão disponíveis ou não foram emitidas no log; não mede por si só o tempo CPU/GPU.
+- Script alterado em `scripts/ensure-rexglue-turnip.py`, commit `fb2501a1b387acc90463e7d2fdf84031d6134016`.
+- Ainda não compilado/testado. Próxima etapa: solicitar build de diagnóstico usando este commit; depois verificar no log de execução a sequência `Loaded custom Vulkan driver through libadrenotools` + `[RECVX-VK-DRIVER]`. Se aparecer aviso de fallback, o driver customizado não foi carregado.
+- Nenhuma alteração em shaders, renderização, formatos depth, FSI, sombras, V-Sync ou configurações de desempenho.
+
+**Local do registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
