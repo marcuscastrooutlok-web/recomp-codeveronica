@@ -107,7 +107,7 @@ function field(label,control){
  const stateClass=supported?'':' unavailable';
  return `<div class="setting${stateClass}" data-setting-label="${label}" aria-disabled="${supported?'false':'true'}"><span>${label}</span>${control}</div>`;
 }
-function tabs(){return `<div class="tabs">${Object.entries(tabNames).map(([k,v])=>`<button class="tab ${activeTab===k?'active':''}" data-tab="${k}">${({graphics:'▣',performance:'◉',controls:'♧',audio:'◖'})[k]} &nbsp;${v}</button>`).join('')}</div>`}
+function tabs(){return `<div class="tabs">${Object.entries(tabNames).map(([k,v])=>`<button class="tab ${activeTab===k?'active':''}" data-tab="${k}">${({graphics:'▣',performance:'◉',controls:'♧',audio:'◖',drivers:'⚙'})[k]||'⚙'} &nbsp;${v}</button>`).join('')}</div>`}
 function settings(){
  const select=(items)=>`<select>${items.split('|').map(x=>`<option>${x}</option>`).join('')}</select>`;
  const toggle=(on=true)=>`<button class="toggle ${on?'on':''}" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'ATIVADO':'DESATIVADO'">${on?'ATIVADO':'DESATIVADO'}</button>`;
