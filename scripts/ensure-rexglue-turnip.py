@@ -67,6 +67,15 @@ REXCVAR_DEFINE_STRING(android_turnip_debug, "", "UI/Vulkan", "Optional Mesa TU_D
   loader_loaded = vulkan_instance->loader_.Load(platform::lib_names::kVulkanLoader);
 #endif
   if (!loader_loaded) {''',"custom driver load with system fallback"),
+("src/ui/vulkan/vulkan_device.cpp",
+'''  ifn.vkGetPhysicalDeviceProperties(physical_device, &properties);''',
+'''  ifn.vkGetPhysicalDeviceProperties(physical_device, &properties);
+  REXLOG_INFO(
+      "[RECVX-VK-DRIVER] device='{}' vendor=0x{:04X} device_id=0x{:04X} api={}.{}.{} driver_version=0x{:08X}",
+      properties.deviceName, properties.vendorID, properties.deviceID,
+      VK_VERSION_MAJOR(properties.apiVersion), VK_VERSION_MINOR(properties.apiVersion),
+      VK_VERSION_PATCH(properties.apiVersion), properties.driverVersion);''',
+"explicit physical-device identity diagnostics"),
 ("src/ui/CMakeLists.txt",
 "target_link_libraries(rexui PRIVATE utf8cpp)",
 """target_link_libraries(rexui PRIVATE utf8cpp)
