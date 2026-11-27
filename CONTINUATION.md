@@ -2320,3 +2320,14 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - Ainda não há evidência de Turnip efetivamente carregado, ganho de FPS, correção de sombras ou validação de controle/áudio nesta compilação.
 
 **Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
+
+
+## Teste visual do gerenciador de drivers #23 — 2026-11-26
+
+- O usuário enviou três capturas da APK #23. A launcher abriu e a aba de drivers está acessível; a seleção nativa apresenta o Driver do sistema e bibliotecas Vulkan importadas. O painel confirma que a escolha é aplicada na próxima inicialização.
+- Defeito visual confirmado: o mapa de ícones da navegação não tinha a chave `drivers`, por isso a aba aparecia como `undefined Drivers`. Corrigido em `assets/launcher/index.html`, commit `364a487c716aea7b1a88c5aeddd5f0eb263b8a8b`, adicionando ícone de engrenagem e fallback.
+- As capturas mostram nomes repetidos/truncados como `Driver vulkan.ad07xx.so`; existem entradas importadas distintas com basename idêntico, então o nome do arquivo isolado não distingue os pacotes. Ainda não foi alterado o formato dos rótulos nem a extração de metadados. A próxima revisão deve usar metadados confiáveis do pacote e/ou um sufixo curto do ID para diferenciar pacotes sem esconder o nome do driver.
+- As capturas não provam qual driver está efetivamente ativo no Vulkan. A lista/seleção na launcher comprova somente que os pacotes foram importados e selecionados no armazenamento do app; é necessário reiniciar o jogo e confirmar no log do dispositivo o carregamento real e as propriedades Vulkan.
+- Build #23 não contém o ajuste visual acima; ele precisa de nova compilação para chegar ao telefone.
+
+**Local do registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
