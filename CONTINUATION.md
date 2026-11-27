@@ -2331,3 +2331,15 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - Build #23 não contém o ajuste visual acima; ele precisa de nova compilação para chegar ao telefone.
 
 **Local do registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
+
+
+## Teste de desempenho APK #23 com Turnip selecionado — 2026-11-26
+
+- O usuário confirmou que as duas capturas de gameplay (cena interna com Claire) foram feitas na APK #23 com o pacote Turnip selecionado na launcher.
+- Contador nas imagens: 17,0 FPS e 17,9 FPS (média aritmética das duas leituras: 17,45 FPS). Resultado abaixo da meta inicial de 30 FPS.
+- A seleção na launcher não prova por si só que o loader carregou o Turnip. Os diagnósticos de build #23 mostram integração/libadrenotools compilada, mas não incluem os logs Vulkan da sessão no aparelho.
+- O SDK já possui logging de identificação Vulkan: linha `Vulkan device ... API ... vendor ... device ... driver version ...` e, quando `VK_KHR_driver_properties` está disponível, `driverName` e `driverInfo`. Usar esses campos no log de execução para confirmar o driver real. Não inferir Turnip só pelo nome selecionado na UI.
+- Próximo passo: obter o log da sessão de jogo da APK #23 no Motorola (idealmente pacote de logs exportado pelo app/diagnóstico; alternativamente logcat filtrado para tags do ReX/ReXGlue/Vulkan). Correlacionar identificação do driver com tempos CPU/GPU, apresentação e avisos de pipeline. Só depois decidir otimizações; preservar renderização e sombras.
+- Não há ainda comprovação de ganho/perda de FPS causado pelo Turnip, nem diagnóstico conclusivo de gargalo CPU/GPU. Comparação futura deve usar mesma cena, resolução, escala, V-Sync e condições térmicas.
+
+**Local do registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
