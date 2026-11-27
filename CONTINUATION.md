@@ -2343,3 +2343,17 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - Não há ainda comprovação de ganho/perda de FPS causado pelo Turnip, nem diagnóstico conclusivo de gargalo CPU/GPU. Comparação futura deve usar mesma cena, resolução, escala, V-Sync e condições térmicas.
 
 **Local do registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
+
+## Análise do logs.zip da APK #23 — sessão com Turnip selecionado — 2026-11-26
+
+- O usuário enviou logs.zip (21 arquivos: recvx.log e recvx.1.log a recvx.20.log), cerca de 105 MB descompactados; logs rotacionados em blocos de aproximadamente 5 MiB.
+- Foram encontradas 104 amostras [RECVX-FPS] Presented FPS, cada uma cobrindo ~2 s, entre 20,0 e 87,4 FPS. Mediana 51,75 FPS; 6/104 amostras abaixo de 30 FPS; 30/104 em 60 FPS ou mais. Não usar média/mediana como FPS estável de gameplay: os arquivos não identificam a cena/atividade correspondente a cada janela. As capturas visuais fornecidas pelo usuário mostram 17,0 e 17,9 FPS naquele instante.
+- As amostras mostram flutuação significativa; a sessão não ficou travada em 17 FPS durante todo o período. Necessário correlacionar com cena e carga para localizar quedas.
+- O pacote não contém linha identificável Vulkan device, driverName ou driverInfo; portanto não confirma se o Turnip foi efetivamente carregado, apesar de o usuário confirmar que o selecionou na launcher.
+- Há enorme repetição da mensagem Qualcomm Vulkan invalid (1110) ... VKDBGUTILWARN003, com cerca de 329.995 ocorrências no conjunto extraído. A mensagem não traz o detalhe específico da advertência, portanto não concluir que seja a causa dos FPS baixos. O spam pode degradar a utilidade do log e merece deduplicação/rate-limit mantendo a primeira ocorrência e contadores.
+- Encontradas centenas de mensagens de criação de pipeline gráfico (VS/PS hash). Não há diagnóstico de tempo de compilação, shader cache hit/miss nem timestamp correlacionado com quedas. Não inferir que compilação de shader seja o gargalo sem instrumentação.
+- Uma mensagem: VulkanPresenter: Presentation to the swapchain image has been dropped as the swapchain or the surface has become outdated (23:11:47.032), no fim do registro. É um evento isolado de superfície/swapchain desatualizada, não prova causa das quedas anteriores.
+- Nenhuma linha SHADOW_DIAG ou SHADOW_BIND_DIAG nos logs desta sessão; o ZIP não esclarece as sombras.
+- Próxima instrumentação recomendada: logar no início do jogo VkPhysicalDeviceProperties e VkPhysicalDeviceDriverProperties (driverName, driverInfo, vendor/device/API/driver version), além do resultado da abertura do Vulkan customizado via adrenotools; registrar FPS em janelas com timestamp e, se possível, CPU frame time/GPU timestamp query e eventos de pipeline cache. Deduplicar VKDBGUTILWARN003. Não alterar shaders, depth formats, FSI, sombras ou sincronização até identificar o driver e o gargalo.
+
+**Local do registro:** marcuscastrooutlok-web/recomp-codeveronica · branch android-rebuild · CONTINUATION.md.
