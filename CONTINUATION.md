@@ -2444,3 +2444,12 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - Alterado `scripts/install-android-game-setup.py` para registrar, na tag `RECVX-DRIVER`, o ID selecionado, estado das pastas/`driver.json`, tamanho e nome da biblioteca, existência do `.so`, rejeição de nome inseguro e confirmação da inclusão dos argumentos. O log distingue explicitamente seleção `system`, ID inválido, metadados ausentes/inválidos e `.so` ausente.
 - Commit desta instrumentação: `9941d95b6fa425bb8de522cdc00c6f6669d701f8` na branch `android-rebuild`.
 - Próxima etapa: solicitar uma única build completa pelo workflow privado, apontando para esse commit. Não alterar shaders, sombras, V-Sync ou otimização nesta etapa. Após instalar o APK, coletar Logcat e conferir a tag `RECVX-DRIVER` para identificar exatamente a condição que impede os argumentos de chegar ao runtime.
+### Build com diagnóstico Java do Turnip — execução #27 (2026-11-28)
+
+- Solicitada uma única compilação completa no repositório privado `marcuscastrooutlok-web/recvx-private-build`, branch `main`.
+- Arquivo de solicitação: `.github/build-requests/vulkan-driver-java-diagnostics-20261128.txt`.
+- Commit da solicitação: `73f34c1bf75acba73bada371e92565ffea722583`.
+- Commit de origem a compilar: `9941d95b6fa425bb8de522cdc00c6f6669d701f8` (branch `android-rebuild` deste repositório).
+- GitHub Actions confirmou a execução #27, ID `46112727901`, workflow `Private Resident Evil Android ARM64 APK`; status observado: `queued` (ainda sem resultado final).
+- A execução anterior #26, ID `46106180964`, terminou com sucesso e corresponde ao APK que o usuário instalou antes de enviar `Logs(8).zip`.
+- Link da execução #27: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/46112727901.
