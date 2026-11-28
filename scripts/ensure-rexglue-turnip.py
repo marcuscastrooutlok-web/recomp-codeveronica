@@ -43,6 +43,7 @@ REXCVAR_DEFINE_STRING(android_turnip_debug, "", "UI/Vulkan", "Optional Mesa TU_D
 #if REX_PLATFORM_ANDROID && defined(REX_HAS_ADRENOTOOLS)
   {
     const std::string& name = REXCVAR_GET(android_gpu_driver_name);
+    REXLOG_INFO("[RECVX-VK-DRIVER] custom selection: name='{}' dir='{}' hooks='{}' tmp='{}'", name, REXCVAR_GET(android_gpu_driver_dir), REXCVAR_GET(android_native_lib_dir), REXCVAR_GET(android_tmp_dir));
     if (!name.empty()) {
       std::string dir = REXCVAR_GET(android_gpu_driver_dir);
       if (!dir.empty() && dir.back() != '/') dir += '/';
