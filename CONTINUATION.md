@@ -2395,3 +2395,17 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - A execução #41 já concluída não pode ser desfeita; a remoção evita novas execuções disparadas por esse workflow.
 
 **Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
+
+
+## Análise dos logs da APK #25 instalada no Motorola — 2026-11-28
+
+- O usuário instalou a APK #25 e enviou `logs(6).zip`: 14 logs rotacionados, 219.719 linhas, aproximadamente 70,2 MB descompactados.
+- **Resultado decisivo do driver:** `[RECVX-VK-DRIVER]` registra `device='Adreno (TM) 730'`, vendor `0x5143`, device `0x7030001`, Vulkan API `1.1.128`, driver version `0x80267000`. A propriedade Vulkan `driverName` é `Qualcomm Technologies Inc. Adreno Vulkan Driver`; `driverInfo` = `Driver Build: ee99c0bfce, Icd6d974f18, 1668172470`. Portanto, nesta sessão foi enumerado o driver Qualcomm do sistema, não há evidência de Turnip ativo.
+- Nenhuma linha com `adrenotools`, `custom Vulkan`, `Turnip`, `Loaded custom Vulkan driver` ou `Could not load custom Vulkan` foi encontrada nos 14 arquivos. O log não explica por que o caminho customizado não foi usado; a identidade Vulkan confirma apenas o driver efetivamente enumerado.
+- FPS: 84 amostras `[RECVX-FPS] Presented FPS`; uma amostra inicial de 496,3 FPS foi excluída como anômala de inicialização. Nas 83 amostras restantes: mínimo 14,7, mediana 49,5, máximo 98,9; 13 abaixo de 30 FPS, 44 entre 30 e 59,9, 26 em 60 FPS ou mais. Não equivale a FPS estável de gameplay: logs não classificam cenas e incluem transições/menus/inicialização. Resultado aponta flutuação e quedas abaixo de 30.
+- Sombras: 49 linhas `SHADOW_DIAG`; confirma caminho de renderização `0=FBO`, FSI não suportado, D24S8 suportado para sampled + depth attachment, features `0x0001F601`. Foram registrados pipelines com e sem depth attachment. Não há `SHADOW_BIND_DIAG`, nem evidência suficiente de uma passada de shadow map ou da amostragem/consumo do mapa; portanto a causa das sombras ausentes continua não resolvida.
+- Avisos Qualcomm `VKDBGUTILWARN003`: 219.160 ocorrências. A mensagem repetida é reportada como erro Vulkan 1110, mas o texto não inclui a explicação detalhada do aviso. É spam severo de log; não concluir que seja a causa direta do FPS baixo.
+- Erros de sistema de arquivos identificados: `ResolvePath(\\Device) failed - device not found` e `NtCreateFile \\Device\\Image` falhou com `0xc000000f`; não há fatal/crash explícito nos logs analisados. Investigar separadamente apenas se afetar carregamento de conteúdo.
+- Próximo passo técnico: investigar por que a seleção salva em `gpu_driver_id` não resulta no carregamento do driver via libadrenotools (validar argumentos de diretório/nome, caminho extraído, chamada de abertura e fallback, com logs explícitos de cada etapa). Não alterar renderização/sombras nem concluir sobre Turnip/FPS antes de resolver a seleção/loader. A APK #25 é válida e inicia, mas o Turnip não foi comprovado como ativo nesta sessão.
+
+**Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
