@@ -2436,3 +2436,11 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - Próximo passo: compilar/testar a instrumentação já adicionada para rastrear argumentos Java -> cvars nativos -> `adrenotools_open_libvulkan`. Não alterar shaders, sombras ou V-Sync até confirmar o driver ativo.
 
 **Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
+
+## Diagnóstico do driver Turnip — APK #26 / instrumentação Java (2026-11-28)
+
+- Logs enviados após instalação do APK #26: `Logs(8).zip`. O runtime registrou `[RECVX-VK-DRIVER] custom selection` com `name`, `dir`, `hooks` e `tmp` vazios; o dispositivo continuou identificando o driver Vulkan Qualcomm/Adreno 730. Portanto, o Turnip selecionado não chegou ao carregador nativo.
+- A inspeção do gerador `scripts/install-android-game-setup.py` confirmou que `GameSDLActivity.getArguments()` lê `gpu_driver_id` de `SharedPreferences("recvx_settings")`, exige ID UUID, abre `files/gpu_drivers/<id>/driver.json`, lê a chave `name` e só acrescenta os quatro argumentos nativos quando o `.so` existe. As falhas de ID inválido e biblioteca ausente não eram registradas; exceções tinham apenas log genérico.
+- Alterado `scripts/install-android-game-setup.py` para registrar, na tag `RECVX-DRIVER`, o ID selecionado, estado das pastas/`driver.json`, tamanho e nome da biblioteca, existência do `.so`, rejeição de nome inseguro e confirmação da inclusão dos argumentos. O log distingue explicitamente seleção `system`, ID inválido, metadados ausentes/inválidos e `.so` ausente.
+- Commit desta instrumentação: `9941d95b6fa425bb8de522cdc00c6f6669d701f8` na branch `android-rebuild`.
+- Próxima etapa: solicitar uma única build completa pelo workflow privado, apontando para esse commit. Não alterar shaders, sombras, V-Sync ou otimização nesta etapa. Após instalar o APK, coletar Logcat e conferir a tag `RECVX-DRIVER` para identificar exatamente a condição que impede os argumentos de chegar ao runtime.
