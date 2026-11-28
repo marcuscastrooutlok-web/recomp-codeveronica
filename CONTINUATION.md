@@ -2453,3 +2453,11 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - GitHub Actions confirmou a execução #27, ID `46112727901`, workflow `Private Resident Evil Android ARM64 APK`; status observado: `queued` (ainda sem resultado final).
 - A execução anterior #26, ID `46106180964`, terminou com sucesso e corresponde ao APK que o usuário instalou antes de enviar `Logs(8).zip`.
 - Link da execução #27: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/46112727901.
+### Resultado da compilação com diagnóstico Java — APK #27 (2026-11-28)
+
+- GitHub Actions execução #27, ID `46112727901`: `completed / success`.
+- O log confirma que o workflow resolveu e fez checkout do commit exato `9941d95b6fa425bb8de522cdc00c6f6669d701f8` do repositório `recomp-codeveronica`; variável `RECVX_SOURCE_COMMIT` também corresponde a esse SHA.
+- Etapas de compilação Android ARM64 concluídas; validação do APK: `APK native library validation: PASS`.
+- Artefato APK: `recvx-private-android-arm64`, ID `15251606417`, 50.7 MB, disponível até 2026-12-01 06:12 UTC. Download pelo painel da execução: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/46112727901
+- Artefato de diagnóstico: `recvx-private-diagnostics`, ID `15251267542`, disponível até 2026-12-05 06:12 UTC.
+- A compilação bem-sucedida comprova que o código instrumentado foi incluído no APK, mas não comprova que o Turnip carregou no aparelho. Próximo passo: usuário instalar o APK #27, iniciar o jogo com o driver personalizado selecionado e enviar Logcat filtrado por `RECVX-DRIVER` e `RECVX-VK-DRIVER`.
