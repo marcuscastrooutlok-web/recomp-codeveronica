@@ -756,22 +756,42 @@ public final class GameSDLActivity extends SDLActivity
         args.add(prefs.getBoolean("async_shader_compilation", true)
             ? "--async_shader_compilation" : "--no-async_shader_compilation");
         String driverId = prefs.getString("gpu_driver_id", "system");
-        if (!"system".equals(driverId) && driverId.matches("[a-f0-9-]{36}")) {
-            File driverDir = new File(new File(getFilesDir(), "gpu_drivers"), driverId);
+        Log.i("RECVX-DRIVER", "startup: rootPresent=true selectedId='" + driverId +
+            "' prefsFile=recvx_settings");
+        if ("system".equals(driverId)) {
+            Log.i("RECVX-DRIVER", "selection=system; custom driver arguments will not be sent");
+        } else if (!driverId.matches("[a-f0-9-]{36}")) {
+            Log.e("RECVX-DRIVER", "selection rejected: driver ID is not a UUID; id='" + driverId + "'");
+        } else {
+            File driverRoot = new File(getFilesDir(), "gpu_drivers");
+            File driverDir = new File(driverRoot, driverId);
             File metadata = new File(driverDir, "driver.json");
+            Log.i("RECVX-DRIVER", "paths: driverRootExists=" + driverRoot.isDirectory() +
+                " driverDirExists=" + driverDir.isDirectory() +
+                " metadataExists=" + metadata.isFile() +
+                " metadataBytes=" + metadata.length());
             try (FileInputStream in = new FileInputStream(metadata)) {
                 byte[] bytes = new byte[(int)Math.min(metadata.length(), 8192)];
                 int count = in.read(bytes);
-                org.json.JSONObject driver = new org.json.JSONObject(new String(bytes, 0, count, java.nio.charset.StandardCharsets.UTF_8));
+                if (count <= 0) throw new IllegalStateException("driver.json is empty or unreadable");
+                org.json.JSONObject driver = new org.json.JSONObject(
+                    new String(bytes, 0, count, java.nio.charset.StandardCharsets.UTF_8));
                 String library = driver.getString("name");
-                if (new File(driverDir, library).isFile()) {
+                File libraryFile = new File(driverDir, library);
+                Log.i("RECVX-DRIVER", "metadata: id='" + driver.optString("id", "") +
+                    "' name='" + library + "' libraryExists=" + libraryFile.isFile() +
+                    " libraryBytes=" + libraryFile.length());
+                if (library.matches("[A-Za-z0-9_.+-]+") && libraryFile.isFile()) {
                     args.add("--android_gpu_driver_dir=" + driverDir.getAbsolutePath());
                     args.add("--android_gpu_driver_name=" + library);
                     args.add("--android_native_lib_dir=" + getApplicationInfo().nativeLibraryDir);
                     args.add("--android_tmp_dir=" + getCacheDir().getAbsolutePath());
+                    Log.i("RECVX-DRIVER", "custom driver arguments added successfully");
+                } else {
+                    Log.e("RECVX-DRIVER", "custom driver rejected: unsafe library name or .so missing");
                 }
             } catch (Exception e) {
-                Log.e("RECVX-DRIVER", "Selected custom driver is unavailable; using system Vulkan", e);
+                Log.e("RECVX-DRIVER", "custom driver setup failed; using system Vulkan", e);
             }
         }
         return args.toArray(new String[0]);
