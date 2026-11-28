@@ -2409,3 +2409,16 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - Próximo passo técnico: investigar por que a seleção salva em `gpu_driver_id` não resulta no carregamento do driver via libadrenotools (validar argumentos de diretório/nome, caminho extraído, chamada de abertura e fallback, com logs explícitos de cada etapa). Não alterar renderização/sombras nem concluir sobre Turnip/FPS antes de resolver a seleção/loader. A APK #25 é válida e inicia, mas o Turnip não foi comprovado como ativo nesta sessão.
 
 **Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
+
+
+## Diagnóstico do driver personalizado na APK #25 — 2026-11-28
+
+- Analisado `logs(6).zip`: 14 arquivos de log, aproximadamente 70,2 MB descompactados.
+- O log contém uma identificação `[RECVX-VK-DRIVER]` do Adreno 730 / Qualcomm Vulkan 1.1.128 (`driver_version=0x80267000`), mas não contém mensagens `Loaded custom Vulkan driver through libadrenotools` nem `Could not load custom Vulkan driver`.
+- Isso prova que a sessão enumerou o driver Qualcomm do sistema; não prova por si só por que o loader customizado não foi tentado. A ausência das duas mensagens é compatível com os cvars do driver personalizado chegando vazios/não sendo passados ao runtime.
+- Código Java de `GameSDLActivity.getArguments()` lê `gpu_driver_id`, abre `driver.json`, valida o arquivo .so e então acrescenta `--android_gpu_driver_dir`, `--android_gpu_driver_name`, `--android_native_lib_dir` e `--android_tmp_dir`. O importador grava `driver.json`; portanto o nome do arquivo de metadados está consistente.
+- Alterado `scripts/ensure-rexglue-turnip.py` para emitir `[RECVX-VK-DRIVER] custom selection` com nome, diretório do pacote, diretório das bibliotecas nativas e diretório temporário imediatamente antes da tentativa de abertura. Commit: `037f49a4e168a1280c28224b4778cb38c9a90987`.
+- Próximo build deve verificar se esses valores chegam preenchidos. Se vazios, investigar passagem dos argumentos/cvars; se preenchidos e houver falha, investigar o retorno do `adrenotools_open_libvulkan` e dependências do pacote. Não mudar shaders, sombras, V-Sync nem configurações gráficas nesta etapa.
+- Os logs #25 registram 219.160 ocorrências de `VKDBGUTILWARN003`; a causa e o impacto no desempenho ainda não estão demonstrados.
+
+**Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
