@@ -2422,3 +2422,17 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - Os logs #25 registram 219.160 ocorrências de `VKDBGUTILWARN003`; a causa e o impacto no desempenho ainda não estão demonstrados.
 
 **Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
+
+
+## Logs(7).zip — análise da APK #25 — 2026-11-28
+
+- 17 arquivos de log, aproximadamente 87,4 MB descompactados.
+- Vulkan identificado como Adreno 730 / Qualcomm Technologies Inc. Adreno Vulkan Driver; API 1.1.128; driver_version=0x80267000. Não há evidência de Turnip ativo.
+- Não há mensagens `Loaded custom Vulkan driver`, `Could not load custom Vulkan driver` nem `custom selection`. A última é esperada: a instrumentação `custom selection` foi adicionada após a compilação da APK #25 (commit `037f49a4e168a1280c28224b4778cb38c9a90987`), portanto estes logs não testam essa alteração.
+- 81 amostras FPS; descartando o outlier 509,4 FPS, 80 amostras: mediana 41,3; mínimo 14,7; máximo 87,3; 26/80 abaixo de 30; 29/80 >=60. Não comprova estabilidade por cena.
+- 272.916 avisos `VKDBGUTILWARN003`; impacto no desempenho não demonstrado.
+- 49 snapshots `SHADOW_DIAG`; alguns com `depth_attachment=1`, outros `0`; nenhum `SHADOW_BIND_DIAG`. Não prova geração/uso correto do mapa de sombras.
+- Um `VulkanPresenter: Failed to create a swapchain` e erros `ResolvePath(\\Device)` / `\\Device\\Image` (`0xc000000f`) aparecem isoladamente; sem contexto suficiente para atribuir causa.
+- Próximo passo: compilar/testar a instrumentação já adicionada para rastrear argumentos Java -> cvars nativos -> `adrenotools_open_libvulkan`. Não alterar shaders, sombras ou V-Sync até confirmar o driver ativo.
+
+**Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
