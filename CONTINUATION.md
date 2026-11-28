@@ -2384,3 +2384,14 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - Nenhuma alteração de shaders, formatos depth, FSI, sombras, V-Sync ou parâmetros de desempenho foi feita nesta etapa.
 
 **Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
+
+
+## Desativação do workflow de protótipo Fiber — 2026-11-28
+
+- O usuário identificou que o workflow `Android ARM64 fiber prototype` estava executando ao atualizar `CONTINUATION.md`, consumindo minutos/créditos sem gerar a APK do jogo.
+- Removido o workflow `.github/workflows/android-arm64-fiber-prototype.yml` da branch `android-rebuild` para impedir novas execuções automáticas ou manuais desse protótipo.
+- Commit de remoção: `cc97a7646a8a1ae7648040c5e0c5bbdd0988601b`.
+- O código-fonte de teste em `tests/fiber-checkpoint/android/` foi preservado; somente o arquivo de workflow foi removido. Isso não afeta o workflow de compilação principal em `recvx-private-build`.
+- A execução #41 já concluída não pode ser desfeita; a remoção evita novas execuções disparadas por esse workflow.
+
+**Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
