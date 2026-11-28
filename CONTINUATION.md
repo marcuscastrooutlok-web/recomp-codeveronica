@@ -2368,3 +2368,19 @@ Foram gravadas duas alterações para integrar gerenciamento de drivers customiz
 - Nenhuma alteração em shaders, renderização, formatos depth, FSI, sombras, V-Sync ou configurações de desempenho.
 
 **Local do registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
+
+
+## Compilação #25 — diagnóstico Vulkan no APK — 2026-11-27
+
+- Workflow privado #25: https://github.com/marcuscastrooutlok-web/recvx-private-build/actions/runs/45927691811 — run ID `45927691811`, conclusão `success`.
+- Build request commit: `44a75d6b085fff7a1c5299cd5810e4ac8f549606`.
+- Revisão efetivamente compilada do RECVX: `1176c9a8b7520832f955d3b4e83826d874bd5228` (branch de origem `android-rebuild`).
+- Etapas ARM64, validação do APK, coleta de diagnósticos e upload concluídas com sucesso. `validation.txt`: `APK native library validation: PASS`.
+- APK artifact: `recvx-private-android-arm64`, artifact ID `15169044063`, 50.710.670 bytes; expira em 2026-11-30 03:11:30 UTC. SHA-256 do ZIP do artefato: `8a6983056d5b6e88b7fa6724ee44400352e1cc792a448ebde25665d640c34b83`.
+- Diagnóstico artifact: `recvx-private-diagnostics`, artifact ID `15169151404`, 88.176 bytes; expira em 2026-12-04 03:11:33 UTC. SHA-256: `ae6a97536514dbd87443becc181ccec54d1f3104dc0302ee3b5020505ff8e6ba`.
+- Inventário do APK confirma bibliotecas ARM64 e `assets/launcher/index.html`; contém `libmain.so`, `librexruntimerd.so`, `librexgpu-xenosrd.so` e `libSDL3.so`. A validação confirma estrutura e dependências empacotadas, não execução no telefone.
+- O pacote de diagnóstico é de build e não contém logcat/runtime do Motorola. Portanto ainda não confirma se `adrenotools_open_libvulkan` abriu o driver customizado nem se o Turnip está ativo. A confirmação exige instalar #25, selecionar o pacote Turnip, iniciar o jogo e coletar log com `Loaded custom Vulkan driver through libadrenotools` e `[RECVX-VK-DRIVER]` (deviceName/vendorID/deviceID/apiVersion/driverVersion).
+- Próximo teste físico é a instalação e coleta do log de execução. Não atribuir ganho de FPS, sombras corrigidas ou driver ativo apenas pelo sucesso da compilação.
+- Nenhuma alteração de shaders, formatos depth, FSI, sombras, V-Sync ou parâmetros de desempenho foi feita nesta etapa.
+
+**Local deste registro:** `marcuscastrooutlok-web/recomp-codeveronica` · branch `android-rebuild` · `CONTINUATION.md`.
